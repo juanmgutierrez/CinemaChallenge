@@ -1,0 +1,39 @@
+// Request for testing directly the movies API
+
+@http-movies-api-domain=localhost
+@http-movies-api-port=7172
+@https-movies-api-domain=localhost
+@https-movies-api-port=7443
+@api-key=68e5fbda-9ec9-4858-97b2-4a8349764c63
+@existent-movie-ID=ID-test1
+@inexistent-movie-ID=ID-test2
+
+###
+
+GET http://{{http-movies-api-domain}}:{{http-movies-api-port}}/v1/movies
+X-Apikey:{{api-key}}
+
+###
+
+GET http://{{http-movies-api-domain}}:{{http-movies-api-port}}/v1/movies/{{existent-movie-ID}}
+X-Apikey:{{api-key}}
+
+###
+
+GET http://{{http-movies-api-domain}}:{{http-movies-api-port}}/v1/movies/{{existent-movie-ID}}
+X-Apikey:{{api-key}}
+
+###
+
+GET https://{{https-movies-api-domain}}:{{https-movies-api-port}}/v1/movies
+X-Apikey:{{api-key}}
+
+###
+
+GET https://{{https-movies-api-domain}}:{{https-movies-api-port}}/v1/movies/{{existent-movie-ID}}
+X-Apikey:{{api-key}}
+
+###
+
+GET https://{{https-movies-api-domain}}:{{https-movies-api-port}}/v1/movies/{{existent-movie-ID}}
+X-Apikey:{{api-key}}
