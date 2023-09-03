@@ -3,7 +3,7 @@
 public class AuditoriumEntity
 {
     public int Id { get; set; }
-    public List<ShowtimeEntity> Showtimes { get; set; }
-    public ICollection<SeatEntity> Seats { get; set; }
 
+    public ICollection<ShowtimeEntity> Showtimes { get; set; } = new List<ShowtimeEntity>();
+    public ICollection<SeatEntity> Seats { get; set; } = new List<SeatEntity>();
 }

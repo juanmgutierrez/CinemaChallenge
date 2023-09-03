@@ -3,50 +3,52 @@ using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace CinemaAPI.Database.Repositories
+namespace CinemaAPI.Database.Repositories;
+
+public class ShowtimesRepository : IShowtimesRepository
 {
-    public class ShowtimesRepository : IShowtimesRepository
+    private readonly CinemaContext _context;
+
+    public ShowtimesRepository(CinemaContext context) => _context = context;
+
+    public async Task<ShowtimeEntity?> Get(
+        int id,
+        CancellationToken cancellationToken,
+        bool includeMovie = false,
+        bool includeTickets = false)
     {
-        private readonly CinemaContext _context;
+        var query = _context.Showtimes.AsQueryable();
 
-        public ShowtimesRepository(CinemaContext context)
-        {
-            _context = context;
-        }
+        if (includeMovie)
+            query = query.Include(x => x.Movie);
+        if (includeTickets)
+            query = query.Include(x => x.Tickets);
 
-        public async Task<ShowtimeEntity> GetWithMoviesByIdAsync(int id, CancellationToken cancel)
-        {
-            return await _context.Showtimes
-                .Include(x => x.Movie)
-                .FirstOrDefaultAsync(x => x.Id == id, cancel);
-        }
+        return await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
 
-        public async Task<ShowtimeEntity> GetWithTicketsByIdAsync(int id, CancellationToken cancel)
-        {
-            return await _context.Showtimes
-                .Include(x => x.Tickets)
-                .FirstOrDefaultAsync(x => x.Id == id, cancel);
-        }
+    public async Task<IEnumerable<ShowtimeEntity>> GetAll(
+        Expression<Func<ShowtimeEntity, bool>> filter,
+        CancellationToken cancellationToken,
+        bool includeMovie = false,
+        bool includeTickets = false)
+    {
+        var query = _context.Showtimes.AsQueryable();
 
-        public async Task<IEnumerable<ShowtimeEntity>> GetAllAsync(Expression<Func<ShowtimeEntity, bool>> filter, CancellationToken cancel)
-        {
-            if (filter == null)
-            {
-                return await _context.Showtimes
-                .Include(x => x.Movie)
-                .ToListAsync(cancel);
-            }
-            return await _context.Showtimes
-                .Include(x => x.Movie)
-                .Where(filter)
-                .ToListAsync(cancel);
-        }
+        if (includeMovie)
+            query = query.Include(x => x.Movie);
+        if (includeTickets)
+            query = query.Include(x => x.Tickets);
+        if (filter is not null)
+            query = query.Where(filter);
 
-        public async Task<ShowtimeEntity> CreateShowtime(ShowtimeEntity showtimeEntity, CancellationToken cancel)
-        {
-            var showtime = await _context.Showtimes.AddAsync(showtimeEntity, cancel);
-            await _context.SaveChangesAsync(cancel);
-            return showtime.Entity;
-        }
+        return await query.ToListAsync(cancellationToken);
+    }
+
+    public async Task<ShowtimeEntity> CreateShowtime(ShowtimeEntity showtimeEntity, CancellationToken cancellationToken)
+    {
+        var showtime = _context.Showtimes.Add(showtimeEntity);
+        await _context.SaveChangesAsync(cancellationToken);
+        return showtime.Entity;
     }
 }

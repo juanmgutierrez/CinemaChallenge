@@ -1,5 +1,6 @@
 using CinemaAPI;
 using CinemaAPI.Database;
+using CinemaAPI.Database.Entities;
 using CinemaAPI.Database.Repositories;
 using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.AspNetCore.Mvc;
@@ -48,7 +49,12 @@ app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapGet("/movies", async () =>
+var externalAPIEndpoints = app.MapGroup("external-api");
+
+#region External API Endpoints
+
+// TODO Check URL naming convention in all routes
+externalAPIEndpoints.MapGet("movies", async () =>
 {
     var c = new ApiClientGrpc();
 
@@ -57,7 +63,7 @@ app.MapGet("/movies", async () =>
 .WithName("GetAllMovies")
 .WithOpenApi();
 
-app.MapGet("/movie/{id}", async ([FromRoute] string id) =>
+externalAPIEndpoints.MapGet("movie/{id}", async ([FromRoute] string id) =>
 {
     var c = new ApiClientGrpc();
 
@@ -66,6 +72,47 @@ app.MapGet("/movie/{id}", async ([FromRoute] string id) =>
 .WithName("GetMovieById")
 .WithOpenApi();
 
+#endregion
+
+var showtimeEndpoints = app.MapGroup("showtime");
+
+#region Showtime Endpoints
+
+showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, CreateShowtimeRequest request) =>
+{
+    var c = new ApiClientGrpc();
+    var movie = await c.GetById(request.MovieId);
+
+    MovieEntity movieEntity = new()
+    {
+        Title = movie.Title,
+        //ImdbId = movie.Duration,
+        Stars = movie.Rank,
+        //ReleaseDate = new DateTime(movie.Year, 1, 1)
+    };
+
+    await showtimesRepository.CreateShowtime(
+        new ShowtimeEntity
+        {
+            Movie = movieEntity,
+            SessionDate = request.SessionDate,
+            AuditoriumId = request.AuditoriumId
+        },
+        CancellationToken.None);
+})
+.WithName("CreateShowtime")
+.WithOpenApi();
+
+#endregion
+
+//var ticketEndpoints = app.MapGroup("ticket");
+
+////Reserve seats.
+////Buy seats.
+
+
 SampleData.Initialize(app);
 
 app.Run();
+
+record CreateShowtimeRequest(string MovieId, DateTime SessionDate, int AuditoriumId);

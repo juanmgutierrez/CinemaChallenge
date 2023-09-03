@@ -8,43 +8,39 @@ namespace CinemaAPI.Database.Repositories
     {
         private readonly CinemaContext _context;
 
-        public TicketsRepository(CinemaContext context)
+        public TicketsRepository(CinemaContext context) => _context = context;
+
+        public async Task<TicketEntity?> Get(Guid id, CancellationToken cancellationToken, bool includeShowtime = false, bool includeSeats = false)
         {
-            _context = context;
+            var query = _context.Tickets.AsQueryable();
+
+            if (includeShowtime)
+                query = query.Include(x => x.Showtime);
+            if (includeSeats)
+                query = query.Include(x => x.Seats);
+
+            return await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
         }
 
-        public Task<TicketEntity> GetAsync(Guid id, CancellationToken cancel)
+        public async Task<TicketEntity> Create(ShowtimeEntity showtime, ICollection<SeatEntity> selectedSeats, CancellationToken cancellationToken)
         {
-            return _context.Tickets.FirstOrDefaultAsync(x => x.Id == id, cancel);
+            var ticket = TicketEntity.Create(showtime.Id, selectedSeats);
+
+            var createdTicket = _context.Tickets.Add(ticket);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
+            return createdTicket.Entity;
         }
 
-        public async Task<IEnumerable<TicketEntity>> GetEnrichedAsync(int showtimeId, CancellationToken cancel)
+        public async Task<TicketEntity> ConfirmPayment(TicketEntity ticket, CancellationToken cancellationToken)
         {
-            return await _context.Tickets
-                .Include(x => x.Showtime)
-                .Include(x => x.Seats)
-                .Where(x => x.ShowtimeId == showtimeId)
-                .ToListAsync(cancel);
-        }
+            ticket.Pay();
 
-        public async Task<TicketEntity> CreateAsync(ShowtimeEntity showtime, IEnumerable<SeatEntity> selectedSeats, CancellationToken cancel)
-        {
-            var ticket = _context.Tickets.Add(new TicketEntity
-            {
-                Showtime = showtime,
-                Seats = new List<SeatEntity>(selectedSeats)
-            });
-
-            await _context.SaveChangesAsync(cancel);
-
-            return ticket.Entity;
-        }
-
-        public async Task<TicketEntity> ConfirmPaymentAsync(TicketEntity ticket, CancellationToken cancel)
-        {
-            ticket.Paid = true;
             _context.Update(ticket);
-            await _context.SaveChangesAsync(cancel);
+
+            await _context.SaveChangesAsync(cancellationToken);
+
             return ticket;
         }
     }
