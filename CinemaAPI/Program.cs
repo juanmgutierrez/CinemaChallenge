@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO ¿Do I need to add Auth?
+// TODO Do I need to add Auth?
 builder.Services.AddAuthentication();
 builder.Services.AddAuthorization();
 
@@ -44,7 +44,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// TODO ¿Do I need to add Auth?
+// TODO Do I need to add Auth?
 app.UseRouting();
 app.UseAuthentication();
 app.UseAuthorization();
@@ -86,9 +86,12 @@ showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, 
     MovieEntity movieEntity = new()
     {
         Title = movie.Title,
-        //ImdbId = movie.Duration,
-        Stars = movie.Rank,
-        //ReleaseDate = new DateTime(movie.Year, 1, 1)
+        FullTitle = movie.Title,
+        ReleaseYear = short.TryParse(movie.Year, out short year) ? year : null,
+        Crew = movie.Crew,
+        Image = movie.Image,
+        ImdbRating = movie.ImdbRating,
+        ImdbRatingCount = movie.ImdbRatingCount
     };
 
     await showtimesRepository.CreateShowtime(
@@ -109,7 +112,6 @@ showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, 
 
 ////Reserve seats.
 ////Buy seats.
-
 
 SampleData.Initialize(app);
 
