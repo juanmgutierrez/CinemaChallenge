@@ -1,10 +1,33 @@
 using CinemaAPI;
+using CinemaAPI.Database;
+using CinemaAPI.Database.Repositories;
+using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
+builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
+builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
+
+builder.Services.AddDbContext<CinemaContext>(options =>
+{
+    options.UseInMemoryDatabase("CinemaDb");
+
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging();
+        options.EnableDetailedErrors();
+        options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+    }
+
+    // TODO ¿Do I specify the memory cache for query caching?
+});
 
 var app = builder.Build();
 
