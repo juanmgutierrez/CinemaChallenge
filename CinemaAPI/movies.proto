@@ -1,0 +1,54 @@
+syntax = "proto3";
+import "google/protobuf/any.proto";
+
+option csharp_namespace = "MoviesAPI";
+
+package movies;
+
+service MoviesApi {
+  rpc GetById(GetMovieByIdRequest) returns (ResponseModel);
+  rpc Search(SearchMovieByTitlesRequest) returns (ResponseModel);
+  rpc GetAll(Empty) returns (ResponseModel);
+}
+
+message Empty {
+}
+
+message GetMovieByIdRequest {
+  string id = 1;
+}
+
+message SearchMovieByTitlesRequest {
+  string text = 1;
+}
+
+message MoviesApiException {
+  string message = 1;
+  int32 status_code = 2;
+}
+
+message ResponseModel {
+  bool success = 1;
+  google.protobuf.Any data  = 2;
+  repeated MoviesApiException exceptions = 3;
+}
+
+// Response model for a show
+// (It would be nice to rename it to meet the proto coding conventions, but is used in a google.protobuf.Any field)
+message showResponse {
+  string id  = 1;
+  string rank  = 2;
+  string title  = 3;
+  string full_title  = 4;
+  string year  = 5;
+  string image  = 6;
+  string crew  = 7;
+  string imdb_rating  = 8;
+  string imdb_rating_count  = 9;
+}
+
+// Response model for a list of shows
+// (It would be nice to rename it to meet the proto coding conventions, but is used in a google.protobuf.Any field)
+message showListResponse {
+  repeated showResponse movies = 1;
+}
