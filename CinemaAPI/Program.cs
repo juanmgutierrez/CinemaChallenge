@@ -8,6 +8,10 @@ using Microsoft.EntityFrameworkCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// TODO ¿Do I need to add Auth?
+builder.Services.AddAuthentication();
+builder.Services.AddAuthorization();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -39,6 +43,11 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+// TODO ¿Do I need to add Auth?
+app.UseRouting();
+app.UseAuthentication();
+app.UseAuthorization();
+
 app.MapGet("/movies", async () =>
 {
     var c = new ApiClientGrpc();
@@ -56,5 +65,7 @@ app.MapGet("/movie/{id}", async ([FromRoute] string id) =>
 })
 .WithName("GetMovieById")
 .WithOpenApi();
+
+SampleData.Initialize(app);
 
 app.Run();

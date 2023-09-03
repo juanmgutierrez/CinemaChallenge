@@ -10,7 +10,6 @@ public class SampleData
         var context = serviceScope.ServiceProvider.GetService<CinemaContext>();
         context.Database.EnsureCreated();
 
-
         context.Auditoriums.Add(new AuditoriumEntity
         {
             Id = 1,
