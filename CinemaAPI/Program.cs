@@ -1,3 +1,6 @@
+using Cinema.Contracts.Auditorium;
+using Cinema.Contracts.Movie;
+using Cinema.Contracts.Showtime;
 using CinemaAPI;
 using CinemaAPI.Database;
 using CinemaAPI.Database.Entities;
@@ -6,6 +9,7 @@ using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +37,8 @@ builder.Services.AddDbContext<CinemaContext>(options =>
 
     // TODO ¿Do I specify the memory cache for query caching?
 });
+
+builder.Services.Configure<JsonOptions>(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
@@ -78,7 +84,7 @@ var showtimeEndpoints = app.MapGroup("showtime");
 
 #region Showtime Endpoints
 
-showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, CreateShowtimeRequest request) =>
+showtimeEndpoints.MapPost("/", async (CreateShowtimeRequest request, IShowtimesRepository showtimesRepository, HttpContext context) =>
 {
     var c = new ApiClientGrpc();
     var movie = await c.GetById(request.MovieId);
@@ -94,7 +100,7 @@ showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, 
         ImdbRatingCount = movie.ImdbRatingCount
     };
 
-    await showtimesRepository.CreateShowtime(
+    var showtime = await showtimesRepository.CreateShowtime(
         new ShowtimeEntity
         {
             Movie = movieEntity,
@@ -102,8 +108,54 @@ showtimeEndpoints.MapPost("/", async (IShowtimesRepository showtimesRepository, 
             AuditoriumId = request.AuditoriumId
         },
         CancellationToken.None);
+
+    ShowtimeResponse response = new(
+        showtime.Id,
+        showtime.SessionDate,
+        new MovieResponse(
+            showtime.Movie.Id,
+            showtime.Movie.Title,
+            showtime.Movie.FullTitle,
+            showtime.Movie.ImdbRating,
+            showtime.Movie.ImdbRatingCount,
+            showtime.Movie.ReleaseYear,
+            showtime.Movie.Image,
+            showtime.Movie.Crew,
+            showtime.Movie.Stars),
+        new AuditoriumResponse(showtime.AuditoriumId));
+
+    return Results.Created(new Uri($"{context.Request.Host}{context.Request.Path}/{showtime.Id}"), response);
 })
+.Produces<ShowtimeResponse>()
 .WithName("CreateShowtime")
+.WithOpenApi();
+
+showtimeEndpoints.MapGet("{id}", async (IShowtimesRepository showtimesRepository, int id) =>
+{
+    var showtime = await showtimesRepository.Get(id, CancellationToken.None, true, true);
+
+    if (showtime is null)
+        return Results.NotFound();
+
+    ShowtimeResponse response = new(
+        showtime.Id,
+        showtime.SessionDate,
+        new MovieResponse(
+            showtime.Movie.Id,
+            showtime.Movie.Title,
+            showtime.Movie.FullTitle,
+            showtime.Movie.ImdbRating,
+            showtime.Movie.ImdbRatingCount,
+            showtime.Movie.ReleaseYear,
+            showtime.Movie.Image,
+            showtime.Movie.Crew,
+            showtime.Movie.Stars),
+        new AuditoriumResponse(showtime.AuditoriumId));
+
+    return Results.Ok(response);
+})
+.Produces<ShowtimeResponse>()
+.WithName("GetShowtime")
 .WithOpenApi();
 
 #endregion

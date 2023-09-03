@@ -1,3 +1,8 @@
-﻿namespace Cinema.Contracts.Showtime;
+﻿using Cinema.Application.Showtime.Commands;
 
-internal record CreateShowtimeRequest(int AuditoriumId, int MovieId, DateTimeOffset SessionDate);
+namespace Cinema.Contracts.Showtime;
+
+public record CreateShowtimeRequest(int AuditoriumId, int MovieId, DateTimeOffset SessionDate)
+{
+    public CreateShowtimeCommand ToCommand() => new(AuditoriumId, MovieId, SessionDate);
+}
