@@ -22,8 +22,11 @@ public class TicketEntity
 
     public static TicketEntity Create(int showtimeId, ICollection<SeatEntity> selectedSeats)
     {
-        TicketEntity ticket = new(showtimeId);
-        ticket.Seats = selectedSeats;
+        TicketEntity ticket = new(showtimeId)
+        {
+            Seats = selectedSeats
+        };
+
         return ticket;
     }
 }

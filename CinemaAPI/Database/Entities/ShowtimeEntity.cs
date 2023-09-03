@@ -3,7 +3,7 @@
 public class ShowtimeEntity
 {
     public int Id { get; set; }
-    public DateTimeOffset SessionDate { get; set; }
+    public required DateTimeOffset SessionDate { get; set; }
 
     public int MovieId { get; set; }
     public MovieEntity Movie { get; set; } = null!;

@@ -23,8 +23,12 @@ public class SampleData
                     {
                         Id = 1,
                         Title = "Inception",
-                        ImdbId = "tt1375666",
-                        ReleaseDate = new DateTime(2010, 01, 14),
+                        FullTitle = "Inception",
+                        ImdbRating = "8.8",
+                        ImdbRatingCount = "2,039,847",
+                        ReleaseYear = 2010,
+                        Image = "",
+                        Crew = "Christopher Nolan",
                         Stars = "Leonardo DiCaprio, Joseph Gordon-Levitt, Ellen Page, Ken Watanabe"
                     },
                     AuditoriumId = 1,

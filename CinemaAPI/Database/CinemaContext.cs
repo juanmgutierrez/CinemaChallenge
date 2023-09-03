@@ -38,7 +38,7 @@ public class CinemaContext : DbContext
         {
             build.HasKey(showtime => showtime.Id);
             build.Property(showtime => showtime.Id).ValueGeneratedOnAdd();
-            build.Property(showtime => showtime.SessionDate).IsRequired();
+            //build.Property(showtime => showtime.SessionDate).IsRequired();
 
             build.HasOne(showtime => showtime.Movie).WithMany(movie => movie.Showtimes).HasForeignKey(showtime => showtime.MovieId);
             build.HasOne(showtime => showtime.Auditorium).WithMany(auditorium => auditorium.Showtimes).HasForeignKey(showtime => showtime.AuditoriumId).IsRequired();
@@ -48,7 +48,7 @@ public class CinemaContext : DbContext
         {
             build.HasKey(movie => movie.Id);
             build.Property(movie => movie.Id).ValueGeneratedOnAdd();
-            build.Property(movie => movie.Title).IsRequired();
+            //build.Property(movie => movie.Title).IsRequired();
         });
 
         modelBuilder.Entity<TicketEntity>(build =>
