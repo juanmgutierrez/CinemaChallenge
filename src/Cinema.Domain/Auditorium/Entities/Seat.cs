@@ -6,6 +6,8 @@ namespace Cinema.Domain.Auditorium.Entities;
 
 public sealed class Seat : Entity<SeatId>
 {
+    private readonly Auditorium _auditorium;
+
     public Seat(SeatId id, Auditorium auditorium, short row, short seatNumber) : base(id)
     {
         if (row <= 0 || row > auditorium.Rows)
@@ -14,12 +16,15 @@ public sealed class Seat : Entity<SeatId>
         if (seatNumber <= 0 || seatNumber > auditorium.SeatsPerRow)
             throw new InvalidAuditoriumSeatNumberException(seatNumber);
 
-        Auditorium = auditorium;
+        _auditorium = auditorium;
+        AuditoriumId = auditorium.Id;
         Row = row;
         SeatNumber = seatNumber;
     }
 
-    public required Auditorium Auditorium { get; init; }
     public required short Row { get; init; }
     public required short SeatNumber { get; init; }
+    
+    public required AuditoriumId AuditoriumId { get; init; }
+    public Auditorium Auditorium => _auditorium;
 }

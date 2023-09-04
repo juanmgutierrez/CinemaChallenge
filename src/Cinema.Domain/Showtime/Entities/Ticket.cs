@@ -8,13 +8,22 @@ namespace Cinema.Domain.Showtime.Entities;
 public class Ticket : Entity<TicketId>
 {
     private const int UnpaidTicketExpirationMinutes = 10;
+    private readonly Showtime _showtime;
 
-    private Ticket(TicketId id) : base(id) => CreatedTime = DateTimeOffset.Now;
+    private Ticket(TicketId id, Showtime showtime) : base(id)
+    {
+        CreatedAt = DateTimeOffset.Now;
+        _showtime = showtime;
+        ShowtimeId = showtime.Id;
+    }
 
-    public DateTimeOffset CreatedTime { get; init; }
-    public required Showtime Showtime { get; init; } = null!;
-    public required List<Seat> Seats { get; init; }
+    public DateTimeOffset CreatedAt { get; init; }
     public bool Paid { get; private set; } = false;
+
+    public ShowtimeId ShowtimeId { get; init; }
+    public Showtime Showtime => _showtime;
+
+    public required List<Seat> Seats { get; init; }
 
     public static Ticket Create(Showtime showtime, List<Seat> selectedSeats)
     {
@@ -33,14 +42,15 @@ public class Ticket : Entity<TicketId>
                 .Any(seat => selectedSeatsHashSet.Contains(seat))))
             throw new AlreadyReservedSeatException();
 
-        return new Ticket(new TicketId(Guid.NewGuid()))
+        return new Ticket(
+            new TicketId(Guid.NewGuid()),
+            showtime)
         {
-            Showtime = showtime,
             Seats = selectedSeats
         };
     }
 
     public void Pay() => Paid = true;
 
-    private bool IsActiveTicket() => Paid || CreatedTime.AddMinutes(UnpaidTicketExpirationMinutes) > DateTimeOffset.Now;
+    private bool IsActiveTicket() => Paid || CreatedAt.AddMinutes(UnpaidTicketExpirationMinutes) > DateTimeOffset.Now;
 }
