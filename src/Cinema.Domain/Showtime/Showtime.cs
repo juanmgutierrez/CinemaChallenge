@@ -9,13 +9,11 @@ namespace Cinema.Domain.Showtime;
 
 public sealed class Showtime : AggregateRoot<ShowtimeId>
 {
-    private readonly Movie _movie;
-    private readonly Auditorium.Auditorium _auditorium;
+    private Movie _movie = default!;
+    private Auditorium.Auditorium _auditorium = default!;
 
-    private Showtime(ShowtimeId id, Movie movie, Auditorium.Auditorium auditorium) : base(id)
+    private Showtime(ShowtimeId id) : base(id)
     {
-        _movie = movie;
-        _auditorium = auditorium;
     }
 
     public DateTimeOffset SessionDate { get; private set; } = default!;
@@ -34,10 +32,12 @@ public sealed class Showtime : AggregateRoot<ShowtimeId>
         if (sessionDate <= DateTimeOffset.UtcNow)
             throw new PastDateTimeException("Session date cannot be in the past");
 
-        return new(id, movie, auditorium)
+        return new(id)
         {
             SessionDate = sessionDate,
-            MovieId = movie.Id
+            MovieId = movie.Id,
+            _movie = movie,
+            _auditorium = auditorium
         };
     }
 

@@ -1,4 +1,5 @@
 ﻿using Cinema.Domain.Showtime.Entities;
+using Cinema.Domain.Showtime.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -11,7 +12,7 @@ internal sealed class TicketEFConfiguration : IEntityTypeConfiguration<Ticket>
         builder.HasKey(ticket => ticket.Id);
         builder.Property(ticket => ticket.Id)
             .ValueGeneratedOnAdd()
-            .HasConversion(id => id.Value, value => new(value));
+            .HasConversion(id => id.Value, value => new TicketId(value));
 
         builder.Property(ticket => ticket.CreatedAt).IsRequired();
 

@@ -1,6 +1,7 @@
 ﻿using Cinema.Application.Showtime.Repositories;
 using Cinema.Infrastructure.Contexts;
 using Cinema.Infrastructure.Respositories;
+using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -36,6 +37,7 @@ public static class DependencyInjection
     private static IServiceCollection AddRepositories(this IServiceCollection services)
     {
         services.AddScoped<IShowtimesRepository, ShowtimesRepository>();
+        services.AddScoped<IAuditoriumsRepository, AuditoriumsRepository>();
 
         return services;
     }

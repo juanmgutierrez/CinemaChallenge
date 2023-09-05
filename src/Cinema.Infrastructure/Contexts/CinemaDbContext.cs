@@ -25,7 +25,8 @@ public class CinemaDbContext : DbContext
 
         modelBuilder.ApplyConfiguration(new AuditoriumEFConfiguration());
         modelBuilder.ApplyConfiguration(new SeatEFConfiguration());
-        modelBuilder.ApplyConfiguration(new MovieEFConfiguration());
         modelBuilder.ApplyConfiguration(new ShowtimeEFConfiguration());
+        modelBuilder.ApplyConfiguration(new MovieEFConfiguration());
+        modelBuilder.ApplyConfiguration(new TicketEFConfiguration());
     }
 }

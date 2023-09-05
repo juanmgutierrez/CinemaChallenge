@@ -8,19 +8,17 @@ namespace Cinema.Domain.Showtime.Entities;
 public class Ticket : Entity<TicketId>
 {
     private const int UnpaidTicketExpirationMinutes = 10;
-    private readonly Showtime _showtime;
+    private Showtime _showtime = default!;
 
-    private Ticket(TicketId id, Showtime showtime) : base(id)
+    private Ticket(TicketId id) : base(id)
     {
         CreatedAt = DateTimeOffset.Now;
-        _showtime = showtime;
-        ShowtimeId = showtime.Id;
     }
 
     public DateTimeOffset CreatedAt { get; init; }
     public bool Paid { get; private set; } = false;
 
-    public ShowtimeId ShowtimeId { get; init; }
+    public ShowtimeId ShowtimeId { get; init; } = default!;
     public Showtime Showtime => _showtime;
 
     public required List<Seat> Seats { get; init; }
@@ -43,10 +41,11 @@ public class Ticket : Entity<TicketId>
             throw new AlreadyReservedSeatException();
 
         return new Ticket(
-            new TicketId(Guid.NewGuid()),
-            showtime)
+            new TicketId(Guid.NewGuid()))
         {
-            Seats = selectedSeats
+            Seats = selectedSeats,
+            ShowtimeId = showtime.Id,
+            _showtime = showtime
         };
     }
 
