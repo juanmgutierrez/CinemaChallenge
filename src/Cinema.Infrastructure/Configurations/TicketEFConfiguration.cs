@@ -22,5 +22,8 @@ internal sealed class TicketEFConfiguration : IEntityTypeConfiguration<Ticket>
             .IsRequired();
         builder.HasMany(ticket => ticket.Seats)
             .WithMany();
+
+        // TODO Document this index
+        builder.HasIndex(ticket => new { ticket.Paid, ticket.CreatedAt }, "IX_Ticket_IsActive");
     }
 }
