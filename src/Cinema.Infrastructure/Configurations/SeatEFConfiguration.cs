@@ -18,8 +18,6 @@ internal sealed class SeatEFConfiguration : IEntityTypeConfiguration<Seat>
         builder.Property(seat => seat.Row).IsRequired();
         builder.Property(seat => seat.SeatNumber).IsRequired();
 
-        // TODO Add FK with Auditorium
-        //public required Auditorium Auditorium { get; init; }
         builder.HasOne<Auditorium>()
             .WithMany()
             .HasForeignKey(seat => seat.AuditoriumId)
