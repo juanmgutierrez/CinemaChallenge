@@ -13,8 +13,8 @@ public sealed class Seat : Entity<SeatId>
     public required short Row { get; init; }
     public required short SeatNumber { get; init; }
 
-    public Auditorium Auditorium { get; init; } = default!;
     public AuditoriumId AuditoriumId { get; init; } = default!;
+    public Auditorium Auditorium { get; init; } = default!;
 
     public static Seat Create(SeatId seatId, Auditorium auditorium, short row, short seatNumber)
     {

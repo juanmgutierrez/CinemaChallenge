@@ -6,8 +6,8 @@ public class ReserveTicketCommandValidator : AbstractValidator<ReserveTicketComm
 {
     public ReserveTicketCommandValidator()
     {
-        RuleFor(c => c.ShowtimeId).NotEmpty();
-        RuleFor(c => c.ShowtimeId.Value).GreaterThan(0);
-        RuleFor(c => c.ToSeatNumber).GreaterThanOrEqualTo(c => c.FromSeatNumber);
+        RuleFor(ticket => ticket.ShowtimeId).NotEmpty();
+        RuleFor(ticket => ticket.ShowtimeId.Value).NotEmpty();
+        RuleFor(ticket => ticket.ToSeatNumber).GreaterThanOrEqualTo(ticket => ticket.FromSeatNumber);
     }
 }

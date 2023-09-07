@@ -10,18 +10,15 @@ internal sealed class ShowtimeEFConfiguration : IEntityTypeConfiguration<Showtim
     {
         builder.HasKey(showtime => showtime.Id);
         builder.Property(showtime => showtime.Id)
-            .ValueGeneratedOnAdd()
+            .ValueGeneratedNever()
             .HasConversion(id => id.Value, value => new(value));
 
         builder.Property(showtime => showtime.SessionDate).IsRequired();
 
-        //builder.HasOne(showtime => showtime.Movie)
-        //    .WithMany()
-        //    .HasForeignKey(showtime => showtime.MovieId)
-        //    .IsRequired();
-        //builder.HasOne(showtime => showtime.Auditorium)
-        //    .WithMany()
-        //    .HasForeignKey(showtime => showtime.AuditoriumId)
-        //    .IsRequired();
+        builder.HasOne(showtime => showtime.Movie)
+            .WithMany();
+
+        builder.HasOne(showtime => showtime.Auditorium)
+            .WithMany();
     }
 }

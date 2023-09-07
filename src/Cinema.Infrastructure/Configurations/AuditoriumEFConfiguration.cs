@@ -11,7 +11,7 @@ internal sealed class AuditoriumEFConfiguration : IEntityTypeConfiguration<Audit
     {
         builder.HasKey(auditorium => auditorium.Id);
         builder.Property(auditorium => auditorium.Id)
-            .ValueGeneratedOnAdd()
+            .ValueGeneratedNever()
             .HasConversion(id => id.Value, value => new AuditoriumId(value));
 
         builder.Property(auditorium => auditorium.Rows).IsRequired();

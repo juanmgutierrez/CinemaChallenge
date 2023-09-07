@@ -1,8 +1,6 @@
 using Cinema.API.Common;
 using Cinema.API.Showtime;
 using Cinema.Infrastructure.InitializationExtensions;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +9,7 @@ builder.Services.AddSwaggerGen();
 
 builder.Services.AddCQRSBehavior();
 
-builder.Services.AddInfrastructure(builder.Environment.IsDevelopment());
-builder.Services.Configure<JsonOptions>(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddInfrastructure(builder.Environment);
 
 var app = builder.Build();
 
@@ -23,7 +20,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseRouting();
 
 app.AddShowtimeEndpoints();

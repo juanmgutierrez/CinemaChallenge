@@ -11,7 +11,7 @@ internal sealed class TicketEFConfiguration : IEntityTypeConfiguration<Ticket>
     {
         builder.HasKey(ticket => ticket.Id);
         builder.Property(ticket => ticket.Id)
-            .ValueGeneratedOnAdd()
+            .ValueGeneratedNever()
             .HasConversion(id => id.Value, value => new TicketId(value));
 
         builder.Property(ticket => ticket.CreatedAt).IsRequired();
@@ -20,6 +20,7 @@ internal sealed class TicketEFConfiguration : IEntityTypeConfiguration<Ticket>
             .WithMany(showtime => showtime.Tickets)
             .HasForeignKey(ticket => ticket.ShowtimeId)
             .IsRequired();
+
         builder.HasMany(ticket => ticket.Seats)
             .WithMany();
 

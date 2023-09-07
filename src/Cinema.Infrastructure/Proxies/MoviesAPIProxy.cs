@@ -14,7 +14,7 @@ public class MoviesAPIProxy : IMoviesAPIProxy
         _moviesApiClient = moviesApiClient;
     }
 
-    public async Task<Movie> GetMovie(string imdbId, CancellationToken cancellationToken)
+    public async Task<Movie?> GetMovie(string imdbId, CancellationToken cancellationToken)
     {
         var request = new GetMovieByIdRequest { Id = imdbId };
 
@@ -30,8 +30,8 @@ public class MoviesAPIProxy : IMoviesAPIProxy
 
         getByIdReply.Data.TryUnpack<showResponse>(out var show);
 
-        return Movie.Create(
-            new MovieId(1),
+        return show is null ? null : Movie.Create(
+            new MovieId(Guid.NewGuid()),
             show.Title,
             show.FullTitle,
             show.Id,

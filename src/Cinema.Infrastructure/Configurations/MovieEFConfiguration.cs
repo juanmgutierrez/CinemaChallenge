@@ -12,6 +12,7 @@ internal sealed class MovieEFConfiguration : IEntityTypeConfiguration<Movie>
         builder.HasKey(movie => movie.Id);
 
         builder.Property(movie => movie.Id)
+            .ValueGeneratedNever()
             .HasConversion(id => id.Value, value => new MovieId(value))
             .HasColumnOrder(0);
 

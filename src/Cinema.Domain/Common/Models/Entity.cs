@@ -5,7 +5,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 {
     public TId Id { get; protected set; }
 
-    public Entity(TId id)
+    protected Entity(TId id)
     {
         Id = id;
     }

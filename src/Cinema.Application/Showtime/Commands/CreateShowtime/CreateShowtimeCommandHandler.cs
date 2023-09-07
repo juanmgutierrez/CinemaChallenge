@@ -1,7 +1,7 @@
 ﻿using Cinema.Application.Auditorium.Repositories;
-using Cinema.Application.Common.Proxies;
 using Cinema.Application.Showtime.Repositories;
 using Cinema.Domain.Auditorium.Exceptions;
+using Cinema.Domain.Showtime.Entities;
 using Cinema.Domain.Showtime.Exceptions;
 using MediatR;
 
@@ -11,28 +11,30 @@ internal sealed class CreateShowtimeCommandHandler : IRequestHandler<CreateShowt
 {
     private readonly IShowtimesRepository _showtimesRepository;
     private readonly IAuditoriumsRepository _auditoriumsRepository;
-    private readonly IMoviesAPIProxy _moviesAPIProxy;
+    private readonly IMoviesRepository _moviesRepository;
 
     public CreateShowtimeCommandHandler(
         IShowtimesRepository showtimesRepository,
         IAuditoriumsRepository auditoriumsRepository,
-        IMoviesAPIProxy moviesAPIProxy)
+        IMoviesRepository moviesRepository)
     {
         _showtimesRepository = showtimesRepository;
         _auditoriumsRepository = auditoriumsRepository;
-        _moviesAPIProxy = moviesAPIProxy;
+        _moviesRepository = moviesRepository;
     }
 
     public async Task<Domain.Showtime.Showtime> Handle(CreateShowtimeCommand request, CancellationToken cancellationToken)
     {
-        var movie = await _moviesAPIProxy.GetMovie(request.MovieImdbId, cancellationToken)
-            ?? throw new InexistentMovieException($"Movie with id {request.MovieImdbId} was not found");
+        Movie? movie = request.MovieId is not null
+            ? await _moviesRepository.GetByMovieId(request.MovieId, cancellationToken)
+                ?? throw new InexistentMovieException($"Movie with id {request.MovieId.Value} was not found")
+            : await _moviesRepository.GetByMovieImdbId(request.MovieImdbId!, cancellationToken)
+                ?? throw new InexistentMovieException($"Movie with imdb id {request.MovieImdbId} was not found");
 
         var auditorium = await _auditoriumsRepository.Get(request.AuditoriumId, cancellationToken)
             ?? throw new InexistentAuditoriumException($"Auditorium with id {request.AuditoriumId} was not found");
 
-        // Showtime ID is created in the database, 1 is a default
-        var showtime = Domain.Showtime.Showtime.Create(new Domain.Showtime.ValueObjects.ShowtimeId(1), request.SessionDate, movie, auditorium);
+        var showtime = Domain.Showtime.Showtime.Create(request.SessionDate, movie, auditorium);
 
         var dbShowtime = await _showtimesRepository.Add(showtime, cancellationToken);
 

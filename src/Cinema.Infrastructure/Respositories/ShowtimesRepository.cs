@@ -18,9 +18,11 @@ public class ShowtimesRepository : IShowtimesRepository
         CancellationToken cancellationToken)
     {
         return await _context.Showtimes
-            .Include(showtime => showtime.Auditorium)
-            .Include(showtime => showtime.Movie)
-            .FirstOrDefaultAsync(showtime => showtime.Id == id, cancellationToken);
+            .Include(show => show.Auditorium)
+            .Include(show => show.Movie)
+            .Include(show => show.Tickets)
+            .ThenInclude(ticket => ticket.Seats)
+            .FirstOrDefaultAsync(show => show.Id == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Showtime>> GetAll(
@@ -31,18 +33,30 @@ public class ShowtimesRepository : IShowtimesRepository
             return Array.Empty<Showtime>();
 
         return await _context.Showtimes
-            .Include(showtime => showtime.Auditorium)
-            .Include(showtime => showtime.Movie)
-            .Include(showtime => showtime.Tickets)
+            .Include(show => show.Auditorium)
+            .Include(show => show.Movie)
+            .Include(show => show.Tickets)
+            .ThenInclude(ticket => ticket.Seats)
             .Where(filter)
-            .ToListAsync();
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<Showtime> Add(Showtime showtime, CancellationToken cancellationToken)
     {
-        var entityEntry = _context.Showtimes.Add(showtime);
+        _context.ChangeTracker.TrackGraph(
+            showtime,
+            node => node.Entry.State = EntityState.Unchanged);
+
+        var addedShowtime = _context.Showtimes.Add(showtime);
+
         // TODO Implement UoW and remove this
         await _context.SaveChangesAsync(cancellationToken);
-        return entityEntry.Entity;
+
+        return await _context.Showtimes
+            .Include(show => show.Movie)
+            .Include(show => show.Auditorium)
+            .Include(show => show.Tickets)
+            .ThenInclude(ticket => ticket.Seats)
+            .FirstAsync(show => show.Id == showtime.Id, cancellationToken);
     }
 }

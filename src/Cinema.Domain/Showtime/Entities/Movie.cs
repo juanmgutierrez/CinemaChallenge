@@ -48,4 +48,18 @@ public sealed class Movie : AggregateRoot<MovieId>
             Stars = stars
         };
     }
+
+    public void UpdateMetadata(Movie movie)
+    {
+        Title = movie.Title ?? Title;
+        FullTitle = movie.FullTitle ?? FullTitle;
+        ImdbId = movie.ImdbId ?? ImdbId;
+        ImdbRating = movie.ImdbRating ?? ImdbRating;
+        ImdbRatingCount = movie.ImdbRatingCount ?? ImdbRatingCount;
+        ReleaseYear = movie.ReleaseYear ?? ReleaseYear;
+        Image = movie.Image ?? Image;
+        Crew = movie.Crew ?? Crew;
+        Rank = movie.Rank ?? Rank;
+        Stars = movie.Stars ?? Stars;
+    }
 }

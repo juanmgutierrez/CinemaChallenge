@@ -13,7 +13,7 @@ internal sealed class PayTicketCommandHandler : IRequestHandler<PayTicketCommand
     public async Task Handle(PayTicketCommand request, CancellationToken cancellationToken)
     {
         var ticket = await _ticketsRepository.Get(request.Id, cancellationToken)
-            ?? throw new InexistentTicketException($"Showtime with id {request.Id.Value} was not found");
+            ?? throw new InexistentTicketException($"Ticket with id {request.Id.Value} was not found");
 
         ticket.Pay();
 

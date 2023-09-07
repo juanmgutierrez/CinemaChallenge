@@ -6,9 +6,11 @@ public class CreateShowtimeCommandValidator : AbstractValidator<CreateShowtimeCo
 {
     public CreateShowtimeCommandValidator()
     {
-        RuleFor(c => c.AuditoriumId).NotEmpty();
-        RuleFor(c => c.AuditoriumId.Value).GreaterThan(0);
-        RuleFor(c => c.MovieImdbId).NotEmpty();
-        RuleFor(c => c.SessionDate).GreaterThan(DateTimeOffset.Now);
+        RuleFor(command => command.AuditoriumId).NotEmpty();
+        RuleFor(command => command.AuditoriumId.Value).NotEmpty();
+        RuleFor(command => command.MovieId).NotEmpty().When(command => string.IsNullOrEmpty(command.MovieImdbId));
+        RuleFor(command => command.MovieId!.Value).NotEmpty().When(command => command.MovieId is not null);
+        RuleFor(command => command.MovieImdbId).NotEmpty().When(command => command.MovieId is null);
+        RuleFor(command => command.SessionDate).GreaterThan(DateTimeOffset.Now);
     }
 }

@@ -19,12 +19,19 @@ public class TicketsRepository : ITicketsRepository
 
     public async Task<Ticket> Add(Ticket ticket, CancellationToken cancellationToken)
     {
-        var entityEntry = _context.Tickets.Add(ticket);
+        //_context.ChangeTracker.TrackGraph(
+        //    ticket,
+        //    node => node.Entry.State = EntityState.Unchanged);
+
+        _context.Tickets.Add(ticket);
 
         // TODO Implement UoW and remove this
         await _context.SaveChangesAsync(cancellationToken);
 
-        return entityEntry.Entity;
+        return await _context.Tickets
+            .Include(t => t.Showtime)
+            .Include(t => t.Seats)
+            .FirstAsync(t => t.Id == ticket.Id, cancellationToken);
     }
 
     public async Task<Ticket> Update(Ticket ticket, CancellationToken cancellationToken)

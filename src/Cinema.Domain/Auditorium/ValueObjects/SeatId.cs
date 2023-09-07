@@ -3,10 +3,11 @@ using Cinema.Domain.Common.Models;
 
 namespace Cinema.Domain.Auditorium.ValueObjects;
 
-public sealed class SeatId : EntityId<int>
+public sealed class SeatId : EntityId<Guid>
 {
-    public SeatId(int value) : base(value)
+    public SeatId(Guid value) : base(value)
     {
-        NonPositiveSeatIdException.ThrowIfNonPositive(value);
+        if (value == Guid.Empty)
+            throw new EmptySeatIdException($"Seat id cannot be empty");
     }
 }

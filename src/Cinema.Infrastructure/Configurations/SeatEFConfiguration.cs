@@ -11,11 +11,15 @@ internal sealed class SeatEFConfiguration : IEntityTypeConfiguration<Seat>
     {
         builder.HasKey(seat => seat.Id);
         builder.Property(seat => seat.Id)
-            .ValueGeneratedOnAdd()
+            .ValueGeneratedNever()
             .HasConversion(id => id.Value, value => new SeatId(value));
 
         builder.Property(seat => seat.Row).IsRequired();
         builder.Property(seat => seat.SeatNumber).IsRequired();
+
+        builder.HasOne(seat => seat.Auditorium)
+            .WithMany()
+            .HasForeignKey(seat => seat.AuditoriumId);
 
         builder.HasIndex(seat => new { seat.AuditoriumId, seat.Row, seat.SeatNumber })
             .IsUnique();

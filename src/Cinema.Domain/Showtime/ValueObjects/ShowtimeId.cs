@@ -3,10 +3,11 @@ using Cinema.Domain.Showtime.Exceptions;
 
 namespace Cinema.Domain.Showtime.ValueObjects;
 
-public sealed class ShowtimeId : EntityId<int>
+public sealed class ShowtimeId : EntityId<Guid>
 {
-    public ShowtimeId(int value) : base(value)
+    public ShowtimeId(Guid value) : base(value)
     {
-        NonPositiveShowtimeIdException.ThrowIfNonPositive(value);
+        if (value == Guid.Empty)
+            throw new EmptyShowtimeIdException($"Showtime id cannot be empty");
     }
 }

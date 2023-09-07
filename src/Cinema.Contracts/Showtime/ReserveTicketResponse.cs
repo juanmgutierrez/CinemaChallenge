@@ -1,8 +1,9 @@
-﻿using Cinema.Domain.Showtime.Entities;
+﻿using Cinema.Contracts.Auditorium;
+using Cinema.Domain.Showtime.Entities;
 
 namespace Cinema.Contracts.Showtime;
 
-public sealed record ReserveTicketResponse(Guid TicketId, int AuditoriumId, MovieResponse Movie, List<SeatResponse> Seats, DateTimeOffset CreatedAt)
+public sealed record ReserveTicketResponse(Guid TicketId, Guid AuditoriumId, MovieResponse Movie, List<SeatResponse> Seats, DateTimeOffset CreatedAt)
 {
     public static ReserveTicketResponse CreateFromDomain(Ticket ticket) =>
         new(

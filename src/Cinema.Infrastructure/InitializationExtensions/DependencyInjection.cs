@@ -6,21 +6,24 @@ using Cinema.Infrastructure.Proxies;
 using Cinema.Infrastructure.Respositories;
 using CinemaAPI.Database.Repositories.Abstractions;
 using Grpc.Net.Client.Configuration;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using MoviesAPI;
 
 namespace Cinema.Infrastructure.InitializationExtensions;
 
 public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructure(this IServiceCollection services, bool isDevelopmentEnvironment)
+    public static IServiceCollection AddInfrastructure(this IServiceCollection services, IWebHostEnvironment environment)
     {
-        services.AddDbContexts(isDevelopmentEnvironment);
+        services.AddDbContexts(environment.IsDevelopment());
         services.AddRepositories();
-        services.AddGrpcClients(isDevelopmentEnvironment);
+        services.AddGrpcClients(environment.IsDevelopment());
         services.AddProxies();
+        services.AddMemoryCache();
         return services;
     }
 
@@ -49,6 +52,7 @@ public static class DependencyInjection
         services.AddScoped<ISeatsRepository, SeatsRepository>();
         services.AddScoped<ITicketsRepository, TicketsRepository>();
         services.AddScoped<IMoviesRepository, MoviesRepository>();
+        services.Decorate<IMoviesRepository, CachedMoviesRepository>();
         return services;
     }
 

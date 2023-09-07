@@ -9,7 +9,6 @@ namespace Cinema.Domain.Showtime.Entities;
 public class Ticket : Entity<TicketId>
 {
     private const int UnpaidTicketExpirationMinutes = 10;
-    private Showtime _showtime = default!;
 
     private Ticket(TicketId id) : base(id)
     {
@@ -20,7 +19,7 @@ public class Ticket : Entity<TicketId>
     public bool Paid { get; private set; } = false;
 
     public ShowtimeId ShowtimeId { get; init; } = default!;
-    public Showtime Showtime => _showtime;
+    public Showtime Showtime { get; init; } = default!;
 
     public required List<Seat> Seats { get; init; }
 
@@ -46,7 +45,7 @@ public class Ticket : Entity<TicketId>
         {
             Seats = selectedSeats,
             ShowtimeId = showtime.Id,
-            _showtime = showtime
+            Showtime = showtime
         };
     }
 

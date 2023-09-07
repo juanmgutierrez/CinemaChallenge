@@ -1,4 +1,6 @@
-﻿using Cinema.Contracts.Showtime;
+﻿using Cinema.Application.Showtime.Commands.PayTicket;
+using Cinema.Contracts.Showtime;
+using Cinema.Domain.Showtime.ValueObjects;
 using MediatR;
 
 namespace Cinema.API.Showtime;
@@ -32,7 +34,9 @@ public static class ShowtimeEndpoints
         .WithName("ReserveTicket")
         .WithOpenApi();
 
-        ticketEndpoints.MapPost("pay", async (ISender sender, PayTicketRequest request) => await sender.Send(request.ToCommand()));
+        ticketEndpoints.MapPost(
+            "{id}/pay",
+            async (ISender sender, Guid id) => await sender.Send(new PayTicketCommand(new TicketId(id))));
 
         return webApplication;
     }

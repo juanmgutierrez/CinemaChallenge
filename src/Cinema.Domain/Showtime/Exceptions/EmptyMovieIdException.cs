@@ -1,15 +1,8 @@
-﻿using Cinema.Domain.Common.Exceptions;
+﻿namespace Cinema.Domain.Showtime.Exceptions;
 
-namespace Cinema.Domain.Showtime.Exceptions;
-
-public sealed class NonPositiveMovieIdException : NonPositiveIntEntityIdException
+public sealed class EmptyMovieIdException : Exception
 {
-    public NonPositiveMovieIdException(string message) : base(message)
+    public EmptyMovieIdException(string message) : base(message)
     {
-    }
-
-    public static new void ThrowIfNonPositive(int id)
-    {
-        NonPositiveIntEntityIdException.ThrowIfNonPositive(id);
     }
 }

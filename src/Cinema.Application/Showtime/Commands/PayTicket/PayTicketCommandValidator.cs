@@ -6,6 +6,6 @@ public class PayTicketCommandValidator : AbstractValidator<PayTicketCommand>
 {
     public PayTicketCommandValidator()
     {
-        RuleFor(c => c.Id).NotEmpty();
+        RuleFor(ticket => ticket.Id).NotEmpty();
     }
 }

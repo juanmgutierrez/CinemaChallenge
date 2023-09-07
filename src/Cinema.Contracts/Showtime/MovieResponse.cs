@@ -3,7 +3,7 @@
 namespace Cinema.Contracts.Showtime;
 
 public sealed record MovieResponse(
-    int Id,
+    Guid Id,
     string Title,
     string FullTitle,
     float? ImdbRating,

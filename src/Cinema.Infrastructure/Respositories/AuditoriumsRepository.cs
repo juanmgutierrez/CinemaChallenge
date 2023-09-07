@@ -14,5 +14,5 @@ public class AuditoriumsRepository : IAuditoriumsRepository
 
     public async Task<Auditorium?> Get(AuditoriumId auditoriumId, CancellationToken cancellationToken) =>
         await _context.Auditoriums
-            .FirstOrDefaultAsync(x => x.Id == auditoriumId, cancellationToken);
+            .FirstOrDefaultAsync(auditorium => auditorium.Id == auditoriumId, cancellationToken);
 }
