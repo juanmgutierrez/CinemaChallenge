@@ -9,13 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="movies.proto" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Grpc.AspNetCore" Version="2.56.0" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" Version="11.7.1" />
+    <PackageReference Include="MediatR" Version="12.1.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="7.0.10" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.4" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.19.5" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.5.0" />
   </ItemGroup>
 
@@ -23,10 +20,7 @@
     <ProjectReference Include="..\Cinema.Application\Cinema.Application.csproj" />
     <ProjectReference Include="..\Cinema.Contracts\Cinema.Contracts.csproj" />
     <ProjectReference Include="..\Cinema.Domain\Cinema.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Protobuf Include="movies.proto" GrpcServices="Client" />
+    <ProjectReference Include="..\Cinema.Infrastructure\Cinema.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

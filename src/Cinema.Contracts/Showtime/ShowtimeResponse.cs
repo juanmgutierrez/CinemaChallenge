@@ -1,6 +1,11 @@
-﻿using Cinema.Contracts.Auditorium;
-using Cinema.Contracts.Movie;
+﻿namespace Cinema.Contracts.Showtime;
 
-namespace Cinema.Contracts.Showtime;
-
-public record ShowtimeResponse(int Id, DateTimeOffset SessionDate, MovieResponse Movie, AuditoriumResponse Auditorium);
+public sealed record ShowtimeResponse(int Id, DateTimeOffset SessionDate, int MovieId, int AuditoriumId)
+{
+    public static ShowtimeResponse CreateFromDomain(Domain.Showtime.Showtime showtime) =>
+        new(
+            Id: showtime.Id.Value,
+            SessionDate: showtime.SessionDate,
+            MovieId: showtime.MovieId.Value,
+            AuditoriumId: showtime.AuditoriumId.Value);
+}

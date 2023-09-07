@@ -1,42 +1,38 @@
-using Cinema.Contracts.Auditorium;
-using Cinema.Contracts.Movie;
+using Cinema.API.Errors;
+using Cinema.Application.Common;
+using Cinema.Application.Common.Behaviours;
 using Cinema.Contracts.Showtime;
-using CinemaAPI;
-using CinemaAPI.Database;
-using CinemaAPI.Database.Entities;
-using CinemaAPI.Database.Repositories;
-using CinemaAPI.Database.Repositories.Abstractions;
+using Cinema.Infrastructure.InitializationExtensions;
+using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// TODO Do I need to add Auth?
-builder.Services.AddAuthentication();
-builder.Services.AddAuthorization();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddTransient<IShowtimesRepository, ShowtimesRepository>();
-builder.Services.AddTransient<ITicketsRepository, TicketsRepository>();
-builder.Services.AddTransient<IAuditoriumsRepository, AuditoriumsRepository>();
-
-builder.Services.AddDbContext<CinemaContext>(options =>
+builder.Services.AddMediatR(cfg =>
 {
-    options.UseInMemoryDatabase("CinemaDb");
+    cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyReference).Assembly);
 
-    if (builder.Environment.IsDevelopment())
-    {
-        options.EnableSensitiveDataLogging();
-        options.EnableDetailedErrors();
-        options.ConfigureWarnings(b => b.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-    }
+    // TODO Add Logging
+    //config.AddBehavior<LoggingBehavior>();
 
-    // TODO ¿Do I specify the memory cache for query caching?
+    cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(RequestValidationPipelineBehavior<,>));
 });
+
+builder.Services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyReference).Assembly);
+
+//builder.Services.AddProblemDetailsFactory(builder.Environment);
+if (builder.Environment.IsProduction())
+    builder.Services.AddSingleton<ProblemDetailsFactory, CinemaProblemDetailsFactory>();
+else
+    builder.Services.AddSingleton<ProblemDetailsFactory, CinemaDebugProblemDetailsFactory>();
+
+builder.Services.AddInfrastructure(builder.Environment.IsDevelopment());
 
 builder.Services.Configure<JsonOptions>(options => options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
@@ -50,33 +46,30 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-// TODO Do I need to add Auth?
 app.UseRouting();
-app.UseAuthentication();
-app.UseAuthorization();
 
 var externalAPIEndpoints = app.MapGroup("external-api");
 
 #region External API Endpoints
 
-// TODO Check URL naming convention in all routes
-externalAPIEndpoints.MapGet("movies", async () =>
-{
-    var c = new ApiClientGrpc();
+//// TODO Check URL naming convention in all routes
+//externalAPIEndpoints.MapGet("movies", async () =>
+//{
+//    var c = new ApiClientGrpc();
 
-    return await c.GetAll();
-})
-.WithName("GetAllMovies")
-.WithOpenApi();
+//    return await c.GetAll();
+//})
+//.WithName("GetAllMovies")
+//.WithOpenApi();
 
-externalAPIEndpoints.MapGet("movie/{id}", async ([FromRoute] string id) =>
-{
-    var c = new ApiClientGrpc();
+//externalAPIEndpoints.MapGet("movie/{id}", async ([FromRoute] string id) =>
+//{
+//    var c = new ApiClientGrpc();
 
-    return await c.GetById(id);
-})
-.WithName("GetMovieById")
-.WithOpenApi();
+//    return await c.GetById(id);
+//})
+//.WithName("GetMovieById")
+//.WithOpenApi();
 
 #endregion
 
@@ -84,79 +77,45 @@ var showtimeEndpoints = app.MapGroup("showtime");
 
 #region Showtime Endpoints
 
-showtimeEndpoints.MapPost("/", async (CreateShowtimeRequest request, IShowtimesRepository showtimesRepository, HttpContext context) =>
+showtimeEndpoints.MapPost("/", async (ISender sender, CreateShowtimeRequest request) =>
 {
-    var c = new ApiClientGrpc();
-    var movie = await c.GetById(request.MovieId);
+    var dbShowtime = await sender.Send(request.ToCommand());
+    return ShowtimeResponse.CreateFromDomain(dbShowtime);
+});
 
-    MovieEntity movieEntity = new()
-    {
-        Title = movie.Title,
-        FullTitle = movie.Title,
-        ReleaseYear = short.TryParse(movie.Year, out short year) ? year : null,
-        Crew = movie.Crew,
-        Image = movie.Image,
-        ImdbRating = movie.ImdbRating,
-        ImdbRatingCount = movie.ImdbRatingCount
-    };
+// TODO Remove if not anymore needed
 
-    var showtime = await showtimesRepository.CreateShowtime(
-        new ShowtimeEntity
-        {
-            Movie = movieEntity,
-            SessionDate = request.SessionDate,
-            AuditoriumId = request.AuditoriumId
-        },
-        CancellationToken.None);
+#region GET
 
-    ShowtimeResponse response = new(
-        showtime.Id,
-        showtime.SessionDate,
-        new MovieResponse(
-            showtime.Movie.Id,
-            showtime.Movie.Title,
-            showtime.Movie.FullTitle,
-            showtime.Movie.ImdbRating,
-            showtime.Movie.ImdbRatingCount,
-            showtime.Movie.ReleaseYear,
-            showtime.Movie.Image,
-            showtime.Movie.Crew,
-            showtime.Movie.Stars),
-        new AuditoriumResponse(showtime.AuditoriumId));
+//showtimeEndpoints.MapGet("{id}", async (IShowtimesRepository showtimesRepository, int id) =>
+//{
+//    var showtime = await showtimesRepository.Get(id, CancellationToken.None, true, true);
 
-    return Results.Created(new Uri($"{context.Request.Host}{context.Request.Path}/{showtime.Id}"), response);
-})
-.Produces<ShowtimeResponse>()
-.WithName("CreateShowtime")
-.WithOpenApi();
+//    if (showtime is null)
+//        return Results.NotFound();
 
-showtimeEndpoints.MapGet("{id}", async (IShowtimesRepository showtimesRepository, int id) =>
-{
-    var showtime = await showtimesRepository.Get(id, CancellationToken.None, true, true);
+//    ShowtimeResponse response = new(
+//        showtime.Id,
+//        showtime.SessionDate,
+//        new MovieResponse(
+//            showtime.Movie.Id,
+//            showtime.Movie.Title,
+//            showtime.Movie.FullTitle,
+//            showtime.Movie.ImdbRating,
+//            showtime.Movie.ImdbRatingCount,
+//            showtime.Movie.ReleaseYear,
+//            showtime.Movie.Image,
+//            showtime.Movie.Crew,
+//            showtime.Movie.Stars),
+//        new AuditoriumResponse(showtime.AuditoriumId));
 
-    if (showtime is null)
-        return Results.NotFound();
+//    return Results.Ok(response);
+//})
+//.Produces<ShowtimeResponse>()
+//.WithName("GetShowtime")
+//.WithOpenApi();
 
-    ShowtimeResponse response = new(
-        showtime.Id,
-        showtime.SessionDate,
-        new MovieResponse(
-            showtime.Movie.Id,
-            showtime.Movie.Title,
-            showtime.Movie.FullTitle,
-            showtime.Movie.ImdbRating,
-            showtime.Movie.ImdbRatingCount,
-            showtime.Movie.ReleaseYear,
-            showtime.Movie.Image,
-            showtime.Movie.Crew,
-            showtime.Movie.Stars),
-        new AuditoriumResponse(showtime.AuditoriumId));
-
-    return Results.Ok(response);
-})
-.Produces<ShowtimeResponse>()
-.WithName("GetShowtime")
-.WithOpenApi();
+#endregion
 
 #endregion
 
@@ -165,8 +124,10 @@ showtimeEndpoints.MapGet("{id}", async (IShowtimesRepository showtimesRepository
 ////Reserve seats.
 ////Buy seats.
 
-SampleData.Initialize(app);
+if (app.Environment.IsDevelopment())
+{
+    app.CreateDatabase();
+    app.SeedDatabase();
+}
 
 app.Run();
-
-record CreateShowtimeRequest(string MovieId, DateTime SessionDate, int AuditoriumId);

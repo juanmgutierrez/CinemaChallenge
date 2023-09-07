@@ -1,8 +1,9 @@
-﻿using Cinema.Application.Showtime.Commands;
+﻿using Cinema.Application.Showtime.Commands.CreateShowtime;
+using Cinema.Domain.Auditorium.ValueObjects;
 
 namespace Cinema.Contracts.Showtime;
 
-public record CreateShowtimeRequest(int AuditoriumId, int MovieId, DateTimeOffset SessionDate)
+public sealed record CreateShowtimeRequest(int AuditoriumId, string MovieImdbId, DateTimeOffset SessionDate)
 {
-    public CreateShowtimeCommand ToCommand() => new(AuditoriumId, MovieId, SessionDate);
+    public CreateShowtimeCommand ToCommand() => new(new AuditoriumId(AuditoriumId), MovieImdbId, SessionDate);
 }

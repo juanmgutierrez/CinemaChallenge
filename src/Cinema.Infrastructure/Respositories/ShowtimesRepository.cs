@@ -18,14 +18,7 @@ public class ShowtimesRepository : IShowtimesRepository
         bool includeMovie = false,
         bool includeTickets = false)
     {
-        var query = _context.Showtimes.AsQueryable();
-
-        if (includeMovie)
-            query = query.Include(x => x.Movie);
-        if (includeTickets)
-            query = query.Include(x => x.Tickets);
-
-        return await query.FirstOrDefaultAsync(x => x.Id.Value == id, cancellationToken);
+        return await GetShowtimesQueryableWithIncludes()!.FirstOrDefaultAsync(x => x.Id.Value == id, cancellationToken);
     }
 
     public async Task<IEnumerable<Showtime>> GetAll(
@@ -34,22 +27,26 @@ public class ShowtimesRepository : IShowtimesRepository
         bool includeMovie = false,
         bool includeTickets = false)
     {
+        return await GetShowtimesQueryableWithIncludes()!.ToListAsync(cancellationToken);
+    }
+
+    public async Task<Showtime> Add(Showtime showtime, CancellationToken cancellationToken)
+    {
+        var entityEntry = _context.Showtimes.Add(showtime);
+        // TODO Implement UoW and remove this
+        await _context.SaveChangesAsync(cancellationToken);
+        return entityEntry.Entity;
+    }
+
+    private IQueryable<Showtime>? GetShowtimesQueryableWithIncludes(bool includeMovie = false, bool includeTickets = false)
+    {
         var query = _context.Showtimes.AsQueryable();
 
         if (includeMovie)
             query = query.Include(x => x.Movie);
         if (includeTickets)
             query = query.Include(x => x.Tickets);
-        if (filter is not null)
-            query = query.Where(filter);
 
-        return await query.ToListAsync(cancellationToken);
-    }
-
-    public async Task<Showtime> CreateShowtime(Showtime showtimeEntity, CancellationToken cancellationToken)
-    {
-        var showtime = _context.Showtimes.Add(showtimeEntity);
-        await _context.SaveChangesAsync(cancellationToken);
-        return showtime.Entity;
+        return query;
     }
 }

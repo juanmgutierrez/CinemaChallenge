@@ -28,7 +28,7 @@ public class ApiClientGrpc
         getAllReply.Data.TryUnpack<showListResponse>(out var movies);
 
         Console.WriteLine($"Total Movies: {movies.Movies.Count}");
-        foreach(var movie in movies.Movies)
+        foreach (var movie in movies.Movies)
         {
             Console.WriteLine($"Movie: {movie.Title}");
         }

@@ -1,7 +1,7 @@
-﻿using Cinema.Domain.Auditorium;
+﻿using Cinema.Application.Auditorium.Repositories;
+using Cinema.Domain.Auditorium;
 using Cinema.Domain.Auditorium.ValueObjects;
 using Cinema.Infrastructure.Contexts;
-using CinemaAPI.Database.Repositories.Abstractions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Cinema.Infrastructure.Respositories;

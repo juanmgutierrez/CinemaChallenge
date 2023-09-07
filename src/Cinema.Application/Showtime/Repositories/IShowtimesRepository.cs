@@ -13,5 +13,5 @@ public interface IShowtimesRepository
         bool includeMovie = false,
         bool includeTickets = false);
 
-    Task<Domain.Showtime.Showtime> CreateShowtime(Domain.Showtime.Showtime showtimeEntity, CancellationToken cancellationToken);
+    Task<Domain.Showtime.Showtime> Add(Domain.Showtime.Showtime showtime, CancellationToken cancellationToken);
 }

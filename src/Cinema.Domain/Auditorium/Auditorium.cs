@@ -18,6 +18,6 @@ public sealed class Auditorium : AggregateRoot<AuditoriumId>
         SeatsPerRow = seatsPerRow;
     }
 
-    public required short Rows { get; init; }
-    public required short SeatsPerRow { get; init; }
+    public short Rows { get; init; }
+    public short SeatsPerRow { get; init; }
 }
