@@ -1,4 +1,5 @@
-﻿using Cinema.Domain.Auditorium.Entities;
+﻿using Cinema.Application.Showtime.Commands.PayTicket;
+using Cinema.Domain.Auditorium.Entities;
 using Cinema.Domain.Common.Models;
 using Cinema.Domain.Showtime.Exceptions;
 using Cinema.Domain.Showtime.ValueObjects;
@@ -30,7 +31,7 @@ public class Ticket : Entity<TicketId>
 
         HashSet<Seat> selectedSeatsHashSet = new(selectedSeats.Count);
 
-        foreach(Seat seat in selectedSeats)
+        foreach (Seat seat in selectedSeats)
             if (!selectedSeatsHashSet.Add(seat))
                 throw new DuplicateSeatsException();
 
@@ -49,7 +50,17 @@ public class Ticket : Entity<TicketId>
         };
     }
 
-    public void Pay() => Paid = true;
+    public void Pay()
+    {
+        if (IsExpired())
+            throw new ExpiredTicketException("Ticket is expired");
+
+        if (Paid)
+            throw new AlreadyPaidTicketException("Ticket is already paid");
+
+        Paid = true;
+    }
 
     private bool IsActiveTicket() => Paid || CreatedAt.AddMinutes(UnpaidTicketExpirationMinutes) > DateTimeOffset.Now;
+    private bool IsExpired() => CreatedAt.AddMinutes(UnpaidTicketExpirationMinutes) <= DateTimeOffset.Now;
 }

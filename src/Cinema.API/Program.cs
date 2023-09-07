@@ -68,11 +68,7 @@ ticketEndpoints.MapPost("reserve", async (ISender sender, ReserveTicketRequest r
 .WithName("ReserveTicket")
 .WithOpenApi();
 
-//ticketEndpoints.MapPost("buy", async (ISender sender, CreateShowtimeRequest request) =>
-//{
-//    var dbShowtime = await sender.Send(request.ToCommand());
-//    return ShowtimeResponse.CreateFromDomain(dbShowtime);
-//});
+ticketEndpoints.MapPost("pay", async (ISender sender, PayTicketRequest request) => await sender.Send(request.ToCommand()));
 
 if (app.Environment.IsDevelopment())
 {

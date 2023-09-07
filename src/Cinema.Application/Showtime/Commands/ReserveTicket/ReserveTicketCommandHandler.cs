@@ -26,7 +26,7 @@ internal sealed class ReserveTicketCommandHandler : IRequestHandler<ReserveTicke
     public async Task<Ticket> Handle(ReserveTicketCommand request, CancellationToken cancellationToken)
     {
         var showtime = await _showtimesRepository.GetWithAuditoriumMovieAndTickets(request.ShowtimeId, cancellationToken)
-            ?? throw new InexistentShowtimeException($"Showtime with id {request.ShowtimeId} was not found");
+            ?? throw new InexistentShowtimeException($"Showtime with id {request.ShowtimeId.Value} was not found");
 
         List<Seat> seats = await _seatsRepository.GetSeatsInRowWithAuditorium(
             showtime.Auditorium.Id,
