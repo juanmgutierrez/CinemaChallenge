@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/src/Cinema.API/cinemaDB.db
+/src/Cinema.API/cinemaDB.db-shm
+/src/Cinema.API/cinemaDB.db-wal
