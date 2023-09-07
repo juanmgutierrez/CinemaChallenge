@@ -1,6 +1,9 @@
 ﻿using Cinema.Domain.Auditorium;
 using Cinema.Domain.Auditorium.Entities;
 using Cinema.Domain.Auditorium.ValueObjects;
+using Cinema.Domain.Showtime;
+using Cinema.Domain.Showtime.Entities;
+using Cinema.Domain.Showtime.ValueObjects;
 using Cinema.Infrastructure.Contexts;
 
 namespace Cinema.Infrastructure;
@@ -20,6 +23,20 @@ public class SampleData
         dbContext.Seats.AddRange(GenerateSeats(auditorium1, ref seatId));
         dbContext.Seats.AddRange(GenerateSeats(auditorium2, ref seatId));
         dbContext.Seats.AddRange(GenerateSeats(auditorium3, ref seatId));
+
+        var movie1 = Movie.Create(
+                new MovieId(1),
+                "Eternal Sunshine of the Spotless Mind",
+                "Eternal Sunshine of the Spotless Mind");
+
+        dbContext.Movies.Add(movie1);
+
+        dbContext.Showtimes.Add(
+            Showtime.Create(
+                new ShowtimeId(1),
+                DateTimeOffset.UtcNow.AddDays(1),
+                movie1,
+                auditorium1));
 
         await dbContext.SaveChangesAsync();
     }

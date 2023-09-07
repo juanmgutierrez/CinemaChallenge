@@ -1,4 +1,6 @@
-﻿namespace Cinema.Contracts.Movie;
+﻿using Cinema.Domain.Showtime.Entities;
+
+namespace Cinema.Contracts.Showtime;
 
 public sealed record MovieResponse(
     int Id,
@@ -11,7 +13,7 @@ public sealed record MovieResponse(
     string? Crew,
     float? Stars)
 {
-    public static MovieResponse CreateFromDomain(Domain.Showtime.Entities.Movie movie) =>
+    public static MovieResponse CreateFromDomain(Movie movie) =>
         new(
             Id: movie.Id.Value,
             Title: movie.Title,

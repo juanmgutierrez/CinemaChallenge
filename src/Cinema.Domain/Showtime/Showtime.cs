@@ -1,5 +1,4 @@
-﻿using Cinema.Domain.Auditorium.ValueObjects;
-using Cinema.Domain.Common.Exceptions;
+﻿using Cinema.Domain.Common.Exceptions;
 using Cinema.Domain.Common.Models;
 using Cinema.Domain.Showtime.Entities;
 using Cinema.Domain.Showtime.Exceptions;
@@ -9,8 +8,8 @@ namespace Cinema.Domain.Showtime;
 
 public sealed class Showtime : AggregateRoot<ShowtimeId>
 {
-    private Movie _movie = default!;
-    private Auditorium.Auditorium _auditorium = default!;
+    //private Movie _movie = default!;
+    //private Auditorium.Auditorium _auditorium = default!;
 
     private Showtime(ShowtimeId id) : base(id)
     {
@@ -18,12 +17,15 @@ public sealed class Showtime : AggregateRoot<ShowtimeId>
 
     public DateTimeOffset SessionDate { get; private set; } = default!;
 
-    public MovieId MovieId { get; private set; } = default!;
-    public Movie Movie => _movie;
+    //public MovieId MovieId { get; private set; } = default!;
+    //public Movie Movie => _movie;
 
     // TODO Improve namespaces
-    public AuditoriumId AuditoriumId { get; private set; } = default!;
-    public Auditorium.Auditorium Auditorium => _auditorium;
+    //public AuditoriumId AuditoriumId { get; private set; } = default!;
+    //public Auditorium.Auditorium Auditorium => _auditorium;
+
+    public Movie Movie { get; init; } = default!;
+    public Auditorium.Auditorium Auditorium { get; init; } = default!;
 
     public HashSet<Ticket> Tickets { get; private set; } = new HashSet<Ticket>();
 
@@ -35,9 +37,11 @@ public sealed class Showtime : AggregateRoot<ShowtimeId>
         return new(id)
         {
             SessionDate = sessionDate,
-            MovieId = movie.Id,
-            _movie = movie,
-            _auditorium = auditorium
+            //MovieId = movie.Id,
+            //_movie = movie,
+            //_auditorium = auditorium
+            Movie = movie,
+            Auditorium = auditorium
         };
     }
 

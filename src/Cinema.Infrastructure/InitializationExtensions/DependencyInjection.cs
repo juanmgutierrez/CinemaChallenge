@@ -4,6 +4,7 @@ using Cinema.Application.Showtime.Repositories;
 using Cinema.Infrastructure.Contexts;
 using Cinema.Infrastructure.Proxies;
 using Cinema.Infrastructure.Respositories;
+using CinemaAPI.Database.Repositories.Abstractions;
 using Grpc.Net.Client.Configuration;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -45,6 +46,9 @@ public static class DependencyInjection
     {
         services.AddScoped<IShowtimesRepository, ShowtimesRepository>();
         services.AddScoped<IAuditoriumsRepository, AuditoriumsRepository>();
+        services.AddScoped<ISeatsRepository, SeatsRepository>();
+        services.AddScoped<ITicketsRepository, TicketsRepository>();
+        services.AddScoped<IMoviesRepository, MoviesRepository>();
         return services;
     }
 

@@ -17,7 +17,7 @@ public class CinemaDbContext : DbContext
     public DbSet<Seat> Seats { get; set; }
     public DbSet<Showtime> Showtimes { get; set; }
     public DbSet<Movie> Movies { get; set; }
-    public DbSet<Ticket> Ticket { get; set; }
+    public DbSet<Ticket> Tickets { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

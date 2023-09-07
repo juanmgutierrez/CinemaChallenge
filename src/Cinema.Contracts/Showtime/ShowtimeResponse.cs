@@ -6,6 +6,6 @@ public sealed record ShowtimeResponse(int Id, DateTimeOffset SessionDate, int Mo
         new(
             Id: showtime.Id.Value,
             SessionDate: showtime.SessionDate,
-            MovieId: showtime.MovieId.Value,
-            AuditoriumId: showtime.AuditoriumId.Value);
+            MovieId: showtime.Movie.Id.Value,
+            AuditoriumId: showtime.Auditorium.Id.Value);
 }

@@ -1,5 +1,4 @@
-﻿using Cinema.Domain.Auditorium;
-using Cinema.Domain.Auditorium.Entities;
+﻿using Cinema.Domain.Auditorium.Entities;
 using Cinema.Domain.Auditorium.ValueObjects;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -17,11 +16,6 @@ internal sealed class SeatEFConfiguration : IEntityTypeConfiguration<Seat>
 
         builder.Property(seat => seat.Row).IsRequired();
         builder.Property(seat => seat.SeatNumber).IsRequired();
-
-        builder.HasOne<Auditorium>()
-            .WithMany()
-            .HasForeignKey(seat => seat.AuditoriumId)
-            .IsRequired();
 
         builder.HasIndex(seat => new { seat.AuditoriumId, seat.Row, seat.SeatNumber })
             .IsUnique();

@@ -13,7 +13,10 @@ internal sealed class CreateShowtimeCommandHandler : IRequestHandler<CreateShowt
     private readonly IAuditoriumsRepository _auditoriumsRepository;
     private readonly IMoviesAPIProxy _moviesAPIProxy;
 
-    public CreateShowtimeCommandHandler(IShowtimesRepository showtimesRepository, IAuditoriumsRepository auditoriumsRepository, IMoviesAPIProxy moviesAPIProxy)
+    public CreateShowtimeCommandHandler(
+        IShowtimesRepository showtimesRepository,
+        IAuditoriumsRepository auditoriumsRepository,
+        IMoviesAPIProxy moviesAPIProxy)
     {
         _showtimesRepository = showtimesRepository;
         _auditoriumsRepository = auditoriumsRepository;

@@ -1,45 +1,37 @@
-﻿using CinemaAPI.Database.Repositories.Abstractions;
+﻿using Cinema.Domain.Showtime.Entities;
+using Cinema.Domain.Showtime.ValueObjects;
+using Cinema.Infrastructure.Contexts;
+using CinemaAPI.Database.Repositories.Abstractions;
+using Microsoft.EntityFrameworkCore;
 
-namespace CinemaAPI.Database.Repositories
+namespace Cinema.Infrastructure.Respositories;
+
+public class TicketsRepository : ITicketsRepository
 {
-    public class TicketsRepository : ITicketsRepository
+    private readonly CinemaDbContext _context;
+
+    public TicketsRepository(CinemaDbContext context) => _context = context;
+
+    public async Task<Ticket?> Get(TicketId id, CancellationToken cancellationToken)
     {
-        //private readonly CinemaContext _context;
+        return await _context.Tickets.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
 
-        //public TicketsRepository(CinemaContext context) => _context = context;
+    public async Task<Ticket> Add(Ticket ticket, CancellationToken cancellationToken)
+    {
+        var entityEntry = _context.Tickets.Add(ticket);
 
-        //public async Task<TicketEntity?> Get(Guid id, CancellationToken cancellationToken, bool includeShowtime = false, bool includeSeats = false)
-        //{
-        //    var query = _context.Tickets.AsQueryable();
+        // TODO Implement UoW and remove this
+        await _context.SaveChangesAsync(cancellationToken);
 
-        //    if (includeShowtime)
-        //        query = query.Include(x => x.Showtime);
-        //    if (includeSeats)
-        //        query = query.Include(x => x.Seats);
+        return entityEntry.Entity;
+    }
 
-        //    return await query.FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
-        //}
-
-        //public async Task<TicketEntity> Create(ShowtimeEntity showtime, ICollection<SeatEntity> selectedSeats, CancellationToken cancellationToken)
-        //{
-        //    var ticket = TicketEntity.Create(showtime.Id, selectedSeats);
-
-        //    var createdTicket = _context.Tickets.Add(ticket);
-
-        //    await _context.SaveChangesAsync(cancellationToken);
-
-        //    return createdTicket.Entity;
-        //}
-
-        //public async Task<TicketEntity> ConfirmPayment(TicketEntity ticket, CancellationToken cancellationToken)
-        //{
-        //    ticket.Pay();
-
-        //    _context.Update(ticket);
-
-        //    await _context.SaveChangesAsync(cancellationToken);
-
-        //    return ticket;
-        //}
+    public async Task<Ticket> Update(Ticket ticket, CancellationToken cancellationToken)
+    {
+        var entityEntry = _context.Tickets.Update(ticket);
+        // TODO Implement UoW and remove this
+        await _context.SaveChangesAsync(cancellationToken);
+        return entityEntry.Entity;
     }
 }

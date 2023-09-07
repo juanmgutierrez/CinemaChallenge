@@ -7,6 +7,7 @@ public class CreateShowtimeCommandValidator : AbstractValidator<CreateShowtimeCo
     public CreateShowtimeCommandValidator()
     {
         RuleFor(c => c.AuditoriumId).NotEmpty();
+        RuleFor(c => c.AuditoriumId.Value).GreaterThan(0);
         RuleFor(c => c.MovieImdbId).NotEmpty();
         RuleFor(c => c.SessionDate).GreaterThan(DateTimeOffset.Now);
     }

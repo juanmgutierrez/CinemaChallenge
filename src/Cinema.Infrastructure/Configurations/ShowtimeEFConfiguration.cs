@@ -15,13 +15,13 @@ internal sealed class ShowtimeEFConfiguration : IEntityTypeConfiguration<Showtim
 
         builder.Property(showtime => showtime.SessionDate).IsRequired();
 
-        builder.HasOne(showtime => showtime.Movie)
-            .WithMany()
-            .HasForeignKey(showtime => showtime.MovieId)
-            .IsRequired();
-        builder.HasOne(showtime => showtime.Auditorium)
-            .WithMany()
-            .HasForeignKey(showtime => showtime.AuditoriumId)
-            .IsRequired();
+        //builder.HasOne(showtime => showtime.Movie)
+        //    .WithMany()
+        //    .HasForeignKey(showtime => showtime.MovieId)
+        //    .IsRequired();
+        //builder.HasOne(showtime => showtime.Auditorium)
+        //    .WithMany()
+        //    .HasForeignKey(showtime => showtime.AuditoriumId)
+        //    .IsRequired();
     }
 }

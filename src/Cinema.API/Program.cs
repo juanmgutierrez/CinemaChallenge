@@ -48,81 +48,31 @@ app.UseHttpsRedirection();
 
 app.UseRouting();
 
-var externalAPIEndpoints = app.MapGroup("external-api");
-
-#region External API Endpoints
-
-//// TODO Check URL naming convention in all routes
-//externalAPIEndpoints.MapGet("movies", async () =>
-//{
-//    var c = new ApiClientGrpc();
-
-//    return await c.GetAll();
-//})
-//.WithName("GetAllMovies")
-//.WithOpenApi();
-
-//externalAPIEndpoints.MapGet("movie/{id}", async ([FromRoute] string id) =>
-//{
-//    var c = new ApiClientGrpc();
-
-//    return await c.GetById(id);
-//})
-//.WithName("GetMovieById")
-//.WithOpenApi();
-
-#endregion
-
 var showtimeEndpoints = app.MapGroup("showtime");
-
-#region Showtime Endpoints
 
 showtimeEndpoints.MapPost("/", async (ISender sender, CreateShowtimeRequest request) =>
 {
     var dbShowtime = await sender.Send(request.ToCommand());
     return ShowtimeResponse.CreateFromDomain(dbShowtime);
-});
+}).Produces<ShowtimeResponse>()
+.WithName("CreateShowtime")
+.WithOpenApi();
 
-// TODO Remove if not anymore needed
+var ticketEndpoints = app.MapGroup("ticket");
 
-#region GET
+ticketEndpoints.MapPost("reserve", async (ISender sender, ReserveTicketRequest request) =>
+{
+    var ticket = await sender.Send(request.ToCommand());
+    return ReserveTicketResponse.CreateFromDomain(ticket);
+}).Produces<ReserveTicketResponse>()
+.WithName("ReserveTicket")
+.WithOpenApi();
 
-//showtimeEndpoints.MapGet("{id}", async (IShowtimesRepository showtimesRepository, int id) =>
+//ticketEndpoints.MapPost("buy", async (ISender sender, CreateShowtimeRequest request) =>
 //{
-//    var showtime = await showtimesRepository.Get(id, CancellationToken.None, true, true);
-
-//    if (showtime is null)
-//        return Results.NotFound();
-
-//    ShowtimeResponse response = new(
-//        showtime.Id,
-//        showtime.SessionDate,
-//        new MovieResponse(
-//            showtime.Movie.Id,
-//            showtime.Movie.Title,
-//            showtime.Movie.FullTitle,
-//            showtime.Movie.ImdbRating,
-//            showtime.Movie.ImdbRatingCount,
-//            showtime.Movie.ReleaseYear,
-//            showtime.Movie.Image,
-//            showtime.Movie.Crew,
-//            showtime.Movie.Stars),
-//        new AuditoriumResponse(showtime.AuditoriumId));
-
-//    return Results.Ok(response);
-//})
-//.Produces<ShowtimeResponse>()
-//.WithName("GetShowtime")
-//.WithOpenApi();
-
-#endregion
-
-#endregion
-
-//var ticketEndpoints = app.MapGroup("ticket");
-
-////Reserve seats.
-////Buy seats.
+//    var dbShowtime = await sender.Send(request.ToCommand());
+//    return ShowtimeResponse.CreateFromDomain(dbShowtime);
+//});
 
 if (app.Environment.IsDevelopment())
 {
