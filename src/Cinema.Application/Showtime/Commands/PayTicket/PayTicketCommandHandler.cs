@@ -1,4 +1,5 @@
-﻿using CinemaAPI.Database.Repositories.Abstractions;
+﻿using Cinema.Domain.Showtime.Exceptions;
+using CinemaAPI.Database.Repositories.Abstractions;
 using MediatR;
 
 namespace Cinema.Application.Showtime.Commands.PayTicket;

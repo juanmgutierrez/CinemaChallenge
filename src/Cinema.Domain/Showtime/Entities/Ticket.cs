@@ -1,5 +1,4 @@
-﻿using Cinema.Application.Showtime.Commands.PayTicket;
-using Cinema.Domain.Auditorium.Entities;
+﻿using Cinema.Domain.Auditorium.Entities;
 using Cinema.Domain.Common.Models;
 using Cinema.Domain.Showtime.Exceptions;
 using Cinema.Domain.Showtime.ValueObjects;

@@ -24,7 +24,7 @@ public sealed class TimeTrackingLoggingPipelineBehavior<TRequest, TResponse> : I
         var result = await next();
 
         stopwatch.Stop();
-        _logger.LogInformation($"Request {request.GetType().Name} took {stopwatch.ElapsedMilliseconds} ms");
+        _logger.LogInformation("Request {TRequest} took {ElapsedMilliseconds} ms", request.GetType().Name, stopwatch.ElapsedMilliseconds);
 
         return result;
     }

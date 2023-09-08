@@ -1,4 +1,4 @@
-﻿namespace Cinema.Application.Showtime.Commands.PayTicket;
+﻿namespace Cinema.Domain.Showtime.Exceptions;
 
 public class AlreadyPaidTicketException : Exception
 {

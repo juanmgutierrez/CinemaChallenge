@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Cinema.Application.Showtime.Commands.CreateShowtime;
 
-internal sealed class CreateShowtimeCommandHandler : IRequestHandler<CreateShowtimeCommand, Domain.Showtime.Showtime>
+public sealed class CreateShowtimeCommandHandler : IRequestHandler<CreateShowtimeCommand, Domain.Showtime.Showtime>
 {
     private readonly IShowtimesRepository _showtimesRepository;
     private readonly IAuditoriumsRepository _auditoriumsRepository;

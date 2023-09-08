@@ -54,7 +54,7 @@ public class CachedMoviesRepository : IMoviesRepository
     {
         string cacheKey = $"Movie_ImdbId_{imdbId}";
 
-        var cachedMovieEntity = await _distributedCache.GetStringAsync(cacheKey);
+        var cachedMovieEntity = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
         CacheEntity<CachedMovieDTO>? cachedMovie = cachedMovieEntity is null ? null : JsonSerializer.Deserialize<CacheEntity<CachedMovieDTO>>(cachedMovieEntity)!;
         if (cachedMovie is not null && CachedValueIsNotOld(cachedMovie))
             return cachedMovie.Value!.ToDomain();
@@ -70,7 +70,8 @@ public class CachedMoviesRepository : IMoviesRepository
             {
                 Value = CachedMovieDTO.FromDomain(movie),
                 CreatedAt = DateTime.UtcNow
-            }));
+            }),
+            cancellationToken);
 
         return movie;
     }
