@@ -22,10 +22,9 @@ public class ReserveTicketCommandHandlerTests
 
     private readonly DateTimeOffset _sessionDate;
     private readonly Showtime _validShowtime;
-    private readonly CancellationToken _cancellationToken = CancellationToken.None;
-
     private readonly List<Seat> _validSeatsList;
     private readonly Ticket _validTicket;
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
 
     public ReserveTicketCommandHandlerTests()
     {

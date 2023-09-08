@@ -1,12 +1,6 @@
-using Cinema.Application.Showtime.Commands.CreateShowtime;
 using Cinema.Application.Showtime.Commands.PayTicket;
-using Cinema.Domain.Auditorium;
-using Cinema.Domain.Auditorium.Exceptions;
-using Cinema.Domain.Auditorium.ValueObjects;
-using Cinema.Domain.Showtime;
 using Cinema.Domain.Showtime.Entities;
 using Cinema.Domain.Showtime.Exceptions;
-using Cinema.Domain.Showtime.ValueObjects;
 using Cinema.UnitTests.Fakes;
 using CinemaAPI.Database.Repositories.Abstractions;
 using FluentAssertions;
@@ -18,193 +12,52 @@ namespace Cinema.UnitTests;
 public class PayTicketCommandHandlerTests
 {
     private readonly PayTicketCommandHandler _sut;
-
     private readonly ITicketsRepository _ticketsRepository = Substitute.For<ITicketsRepository>();
+    private readonly Ticket _validTicket;
+    private readonly PayTicketCommand _command;
+    private readonly CancellationToken _cancellationToken = CancellationToken.None;
 
     public PayTicketCommandHandlerTests()
     {
         _sut = new PayTicketCommandHandler(_ticketsRepository);
 
+        var sessionDate = DateTimeOffset.UtcNow.AddDays(1);
+        var validShowtime = ShowtimeFakes.ValidShowtime(sessionDate);
+        var validSeatsList = SeatFakes.ValidSeatsList(
+            FakeConstants.SeatsRow,
+            FakeConstants.SeatsFromSeatNumber,
+            FakeConstants.SeatsUntilSeatNumber);
+        _validTicket = TicketFakes.ValidTicket(
+            validShowtime,
+            validSeatsList);
+
+        _command = new PayTicketCommand(_validTicket.Id);
     }
 
-    //[Fact]
-    //public void Handle_ShouldThrowInexistentMovieException_WhenMovieGivenByMovieIdDoesNotExist()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = null;
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
+    [Fact]
+    public void Handle_ShouldThrowInexistentTicketException_WhenTicketIdDoesNotExist()
+    {
+        // Arrange
+        _ticketsRepository.Get(_command.Id, _cancellationToken).ReturnsNull();
 
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).ReturnsNull();
+        // Act
+        var act = async () => await _sut.Handle(_command, _cancellationToken);
 
-    //    // Act
-    //    var act = async () => await _sut.Handle(command, cancellationToken);
+        // Assert
+        act.Should().ThrowAsync<InexistentTicketException>()
+            .WithMessage($"Ticket with id {_command.Id.Value} was not found");
+    }
 
-    //    // Assert
-    //    act.Should().ThrowAsync<InexistentMovieException>()
-    //        .WithMessage($"Movie with id {movieId} was not found");
-    //}
+    [Fact]
+    public async Task Handle_ShouldMarkTicketAsPaid_WhenValidCommandIsPassed()
+    {
+        // Arrange
+        _ticketsRepository.Get(_command.Id, _cancellationToken).Returns(Task.FromResult<Ticket?>(_validTicket));
 
-    //[Fact]
-    //public void Handle_ShouldThrowInexistentMovieException_WhenMovieGivenByMovieImdbIdDoesNotExist()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = null;
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
+        // Act
+        await _sut.Handle(_command, _cancellationToken);
 
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).ReturnsNull();
-
-    //    // Act
-    //    var act = async () => await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    act.Should().ThrowAsync<InexistentMovieException>()
-    //        .WithMessage($"Movie with id {movieId} was not found");
-    //}
-
-    //[Fact]
-    //public void Handle_ShouldThrowInexistentAuditoriumException_WhenAuditoriumDoesNotExist()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).ReturnsNull();
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).ReturnsNull();
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).ReturnsNull();
-
-    //    // Act
-    //    var act = async () => await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    act.Should().ThrowAsync<InexistentAuditoriumException>()
-    //        .WithMessage($"Auditorium with id {auditoriumId} was not found");
-    //}
-
-    //[Fact]
-    //public async Task Handle_ShouldReturnNotNullShowtime_WhenValidAuditoriumAndMovieArePassed()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).Returns(Task.FromResult<Auditorium?>(AuditoriumFakes.ValidAuditorium));
-    //    _showtimesRepository.Add(Arg.Any<Showtime>(), cancellationToken).Returns(Task.FromResult(ShowtimeFakes.ValidShowtime));
-
-    //    // Act
-    //    var showtime = await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    showtime.Should().NotBeNull();
-    //    showtime.Should().BeOfType<Showtime>();
-    //}
-
-    //[Fact]
-    //public async Task Handle_ShouldReturnShowtimeWithSameMovie_WhenValidAuditoriumAndMovieArePassed()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).Returns(Task.FromResult<Auditorium?>(AuditoriumFakes.ValidAuditorium));
-    //    _showtimesRepository.Add(Arg.Any<Showtime>(), cancellationToken).Returns(Task.FromResult(ShowtimeFakes.ValidShowtime));
-
-    //    // Act
-    //    var showtime = await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    showtime.Movie.Id.Equals(movieId);
-    //}
-
-    //[Fact]
-    //public async Task Handle_ShouldReturnShowtimeWithSameAuditorium_WhenValidAuditoriumAndMovieArePassed()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).Returns(Task.FromResult<Auditorium?>(AuditoriumFakes.ValidAuditorium));
-    //    _showtimesRepository.Add(Arg.Any<Showtime>(), cancellationToken).Returns(Task.FromResult(ShowtimeFakes.ValidShowtime));
-
-    //    // Act
-    //    var showtime = await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    showtime.Auditorium.Id.Equals(auditoriumId);
-    //}
-
-    //[Fact]
-    //public async Task Handle_ShouldReturnShowtimeWithDesiredSessionDate_WhenValidAuditoriumAndMovieArePassed()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).Returns(Task.FromResult<Auditorium?>(AuditoriumFakes.ValidAuditorium));
-    //    _showtimesRepository.Add(Arg.Any<Showtime>(), cancellationToken).Returns(Task.FromResult(ShowtimeFakes.ValidShowtime));
-
-    //    // Act
-    //    var showtime = await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    showtime.SessionDate.Equals(sessionDate);
-    //}
-
-    //[Fact]
-    //public async Task Handle_ShouldReturnShowtimeWithoutTickets_WhenValidAuditoriumAndMovieArePassed()
-    //{
-    //    // Arrange
-    //    AuditoriumId auditoriumId = new(Guid.NewGuid());
-    //    DateTimeOffset sessionDate = DateTimeOffset.UtcNow.AddDays(1);
-    //    MovieId? movieId = new(Guid.NewGuid());
-    //    string? movieImdbId = "tt1234567";
-    //    CreateShowtimeCommand command = new(auditoriumId, sessionDate, movieId, movieImdbId);
-    //    CancellationToken cancellationToken = CancellationToken.None;
-
-    //    _moviesRepository.GetByMovieId(movieId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _moviesRepository.GetByMovieImdbId(movieImdbId, cancellationToken).Returns(Task.FromResult<Movie?>(MovieFakes.ValidMovie));
-    //    _auditoriumsRepository.Get(auditoriumId, cancellationToken).Returns(Task.FromResult<Auditorium?>(AuditoriumFakes.ValidAuditorium));
-    //    _showtimesRepository.Add(Arg.Any<Showtime>(), cancellationToken).Returns(Task.FromResult(ShowtimeFakes.ValidShowtime));
-
-    //    // Act
-    //    var showtime = await _sut.Handle(command, cancellationToken);
-
-    //    // Assert
-    //    showtime.Tickets.Should().BeEmpty();
-    //}
+        // Assert
+        _validTicket.Paid.Should().BeTrue();
+    }
 }
