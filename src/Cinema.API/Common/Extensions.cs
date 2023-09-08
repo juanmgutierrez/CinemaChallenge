@@ -13,10 +13,8 @@ public static class Extensions
         {
             cfg.RegisterServicesFromAssembly(typeof(ApplicationAssemblyReference).Assembly);
 
-            // TODO Add Logging
-            //config.AddBehavior<LoggingBehavior>();
-
             cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(RequestValidationPipelineBehavior<,>));
+            cfg.AddBehavior(typeof(IPipelineBehavior<,>), typeof(TimeTrackingLoggingPipelineBehavior<,>));
         });
 
         services.AddValidatorsFromAssembly(typeof(ApplicationAssemblyReference).Assembly);
