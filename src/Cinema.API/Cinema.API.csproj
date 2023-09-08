@@ -23,4 +23,12 @@
     <ProjectReference Include="..\Cinema.Infrastructure\Cinema.Infrastructure.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EditorConfigFiles Remove="C:\Users\jmgutierrez\Desktop\CinemaChallenge\src\Cinema.API\.editorconfig" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="C:\Users\jmgutierrez\Desktop\CinemaChallenge\src\Cinema.API\.editorconfig" />
+  </ItemGroup>
+
 </Project>
