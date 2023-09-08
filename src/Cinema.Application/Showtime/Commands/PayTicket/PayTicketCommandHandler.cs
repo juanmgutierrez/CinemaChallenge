@@ -4,7 +4,7 @@ using MediatR;
 
 namespace Cinema.Application.Showtime.Commands.PayTicket;
 
-internal sealed class PayTicketCommandHandler : IRequestHandler<PayTicketCommand>
+public sealed class PayTicketCommandHandler : IRequestHandler<PayTicketCommand>
 {
     private readonly ITicketsRepository _ticketsRepository;
 

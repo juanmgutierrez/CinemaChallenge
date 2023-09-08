@@ -4,9 +4,9 @@ namespace Cinema.UnitTests.Fakes;
 
 internal static class ShowtimeFakes
 {
-    internal static Showtime ValidShowtime =>
+    internal static Showtime ValidShowtime(DateTimeOffset sessionDate) =>
         Showtime.Create(
-            DateTimeOffset.UtcNow.AddDays(1),
+            sessionDate,
             MovieFakes.ValidMovie,
             AuditoriumFakes.ValidAuditorium);
 }

@@ -19,10 +19,6 @@ public class TicketsRepository : ITicketsRepository
 
     public async Task<Ticket> Add(Ticket ticket, CancellationToken cancellationToken)
     {
-        //_context.ChangeTracker.TrackGraph(
-        //    ticket,
-        //    node => node.Entry.State = EntityState.Unchanged);
-
         _context.Tickets.Add(ticket);
 
         // TODO Implement UoW and remove this

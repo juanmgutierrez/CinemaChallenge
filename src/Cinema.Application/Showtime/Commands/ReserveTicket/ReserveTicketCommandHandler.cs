@@ -7,7 +7,7 @@ using MediatR;
 
 namespace Cinema.Application.Showtime.Commands.ReserveTicket;
 
-internal sealed class ReserveTicketCommandHandler : IRequestHandler<ReserveTicketCommand, Ticket>
+public sealed class ReserveTicketCommandHandler : IRequestHandler<ReserveTicketCommand, Ticket>
 {
     private readonly IShowtimesRepository _showtimesRepository;
     private readonly ISeatsRepository _seatsRepository;

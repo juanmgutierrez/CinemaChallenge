@@ -6,7 +6,7 @@ internal static class MovieFakes
 {
     internal static Movie ValidMovie =>
         Movie.Create(
-            new(Guid.NewGuid()),
+            new(FakeConstants.MovieId),
             "Movie Title",
             "Movie Full Title",
             "tt1234567",
