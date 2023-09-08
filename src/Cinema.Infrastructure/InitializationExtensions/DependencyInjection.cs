@@ -23,7 +23,7 @@ public static class DependencyInjection
         services.AddRepositories();
         services.AddGrpcClients(environment.IsDevelopment());
         services.AddProxies();
-        services.AddMemoryCache();
+        services.AddCache();
         return services;
     }
 
@@ -101,6 +101,26 @@ public static class DependencyInjection
     private static IServiceCollection AddProxies(this IServiceCollection services)
     {
         services.AddScoped<IMoviesAPIProxy, MoviesAPIProxy>();
+        return services;
+    }
+
+    private static IServiceCollection AddCache(this IServiceCollection services)
+    {
+        services.AddStackExchangeRedisCache(redisOptions =>
+        {
+            // TODO Extract to appsettings.json
+            redisOptions.Configuration = "localhost:6379";
+            //redisOptions.ConfigurationOptions = new()
+            //{
+            //    Ssl = false,
+            //    AbortOnConnectFail = false,
+            //    ConnectRetry = 3,
+            //    ConnectTimeout = 10000,
+            //    SyncTimeout = 1000,
+            //    EndPoints = { "localhost:6379" }
+            //};
+        });
+
         return services;
     }
 }

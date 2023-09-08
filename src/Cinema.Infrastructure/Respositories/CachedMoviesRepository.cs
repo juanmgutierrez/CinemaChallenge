@@ -2,19 +2,21 @@
 using Cinema.Domain.Showtime.Entities;
 using Cinema.Domain.Showtime.ValueObjects;
 using Cinema.Infrastructure.Common;
-using Microsoft.Extensions.Caching.Memory;
+using Cinema.Infrastructure.DTOs;
+using Microsoft.Extensions.Caching.Distributed;
+using System.Text.Json;
 
 namespace Cinema.Infrastructure.Respositories;
 
 public class CachedMoviesRepository : IMoviesRepository
 {
     private readonly IMoviesRepository _moviesRepository;
-    private readonly IMemoryCache _memoryCache;
+    private readonly IDistributedCache _distributedCache;
 
-    public CachedMoviesRepository(IMoviesRepository moviesRepository, IMemoryCache memoryCache)
+    public CachedMoviesRepository(IMoviesRepository moviesRepository, IDistributedCache distributedCache)
     {
         _moviesRepository = moviesRepository;
-        _memoryCache = memoryCache;
+        _distributedCache = distributedCache;
     }
 
     public async Task<Movie> Add(Movie movie, CancellationToken cancellationToken)
@@ -26,42 +28,49 @@ public class CachedMoviesRepository : IMoviesRepository
     {
         string cacheKey = $"Movie-Id-{id.Value}";
 
-        if (_memoryCache.TryGetValue(cacheKey, out CacheEntity<Movie>? cachedMovie)
-            && CachedValueIsNotOld(cachedMovie!))
-            return cachedMovie!.Value;
+        var cachedMovieEntity = await _distributedCache.GetStringAsync(cacheKey, cancellationToken);
+        CacheEntity<Movie>? cachedMovie = cachedMovieEntity is null ? null : JsonSerializer.Deserialize<CacheEntity<Movie>>(cachedMovieEntity)!;
+        if (cachedMovie is not null && CachedValueIsNotOld(cachedMovie))
+            return cachedMovie.Value;
 
         var movie = await _moviesRepository.GetByMovieId(id, cancellationToken);
 
         if (movie is null)
             return cachedMovie?.Value;
 
-        _memoryCache.Set(cacheKey, new CacheEntity<Movie>
-        {
-            Value = movie,
-            CreatedAt = DateTime.UtcNow
-        });
+        await _distributedCache.SetStringAsync(
+            cacheKey,
+            JsonSerializer.Serialize(new CacheEntity<Movie>
+            {
+                Value = movie,
+                CreatedAt = DateTime.UtcNow
+            }),
+            cancellationToken);
 
         return movie;
     }
 
     public async Task<Movie?> GetByMovieImdbId(string imdbId, CancellationToken cancellationToken)
     {
-        string cacheKey = $"Movie-ImdbId-{imdbId}";
+        string cacheKey = $"Movie_ImdbId_{imdbId}";
 
-        if (_memoryCache.TryGetValue(cacheKey, out CacheEntity<Movie>? cachedMovie)
-            && CachedValueIsNotOld(cachedMovie!))
-            return cachedMovie!.Value;
+        var cachedMovieEntity = await _distributedCache.GetStringAsync(cacheKey);
+        CacheEntity<CachedMovieDTO>? cachedMovie = cachedMovieEntity is null ? null : JsonSerializer.Deserialize<CacheEntity<CachedMovieDTO>>(cachedMovieEntity)!;
+        if (cachedMovie is not null && CachedValueIsNotOld(cachedMovie))
+            return cachedMovie.Value!.ToDomain();
 
         var movie = await _moviesRepository.GetByMovieImdbId(imdbId, cancellationToken);
 
         if (movie is null)
-            return cachedMovie?.Value;
+            return cachedMovie?.Value?.ToDomain();
 
-        _memoryCache.Set(cacheKey, new CacheEntity<Movie>
-        {
-            Value = movie,
-            CreatedAt = DateTime.UtcNow
-        });
+        await _distributedCache.SetStringAsync(
+            cacheKey,
+            JsonSerializer.Serialize(new CacheEntity<CachedMovieDTO>
+            {
+                Value = CachedMovieDTO.FromDomain(movie),
+                CreatedAt = DateTime.UtcNow
+            }));
 
         return movie;
     }
@@ -71,6 +80,6 @@ public class CachedMoviesRepository : IMoviesRepository
         return await _moviesRepository.Update(movie, cancellationToken);
     }
 
-    private static bool CachedValueIsNotOld(CacheEntity<Movie> cachedMovie)
+    private static bool CachedValueIsNotOld<T>(CacheEntity<T> cachedMovie)
         => DateTime.UtcNow < cachedMovie.CreatedAt.AddMinutes(10);
 }

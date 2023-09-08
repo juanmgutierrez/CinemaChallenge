@@ -1,7 +1,7 @@
 ﻿namespace Cinema.Infrastructure.Common;
 
-internal class CacheEntity<T>
+public class CacheEntity<T>
 {
-    internal T? Value { get; set; }
-    internal DateTime CreatedAt { get; set; }
+    public T? Value { get; set; }
+    public DateTime CreatedAt { get; set; }
 }
